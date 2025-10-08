@@ -218,7 +218,7 @@ def setup_security_middleware():
             CORSMiddleware,
             allow_origins=dev_origins,
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+            allow_methods=["*"],  # Allow all methods including OPTIONS
             allow_headers=["*"],
         )
         logger.warning(f"⚠️ CORS_ORIGINS not configured - using development defaults: {dev_origins}")
