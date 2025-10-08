@@ -240,6 +240,125 @@ def generate_realistic_stock_data(tickers: List[str], scoring_date: date) -> pd.
     return pd.DataFrame(data)
 
 
+def calculate_demo_pillar_scores(stock_data: Dict, mode: str) -> Dict[str, float]:
+    """Calculate simplified pillar scores for demo purposes."""
+    
+    # Fundamentals Pillar (F) - based on financial ratios
+    f_score = 50  # base score
+    if stock_data['pe_ratio'] < 20: f_score += 10
+    if stock_data['roe'] > 15: f_score += 15
+    if stock_data['debt_equity'] < 0.5: f_score += 10  
+    if stock_data['current_ratio'] > 1.2: f_score += 8
+    if stock_data['revenue_growth'] > 10: f_score += 7
+    f_score = min(100, max(0, f_score))
+    
+    # Technicals Pillar (T) - based on price momentum & indicators  
+    t_score = 50
+    if stock_data['returns_1m'] > 5: t_score += 12
+    if stock_data['returns_3m'] > 10: t_score += 10
+    if stock_data['rsi_14'] > 30 and stock_data['rsi_14'] < 70: t_score += 8
+    if stock_data['volatility_30d'] < 30: t_score += 10
+    if mode == 'Trader' and stock_data['returns_1m'] > 0: t_score += 10  # Trader bonus
+    t_score = min(100, max(0, t_score))
+    
+    # Relative Strength Pillar (R) - momentum vs market
+    r_score = 50
+    if stock_data['momentum_1m'] > 2: r_score += 15
+    if stock_data['momentum_3m'] > 5: r_score += 12
+    if stock_data['relative_strength'] > 0: r_score += 13
+    if stock_data['returns_6m'] > 15: r_score += 10
+    r_score = min(100, max(0, r_score))
+    
+    # Ownership Pillar (O) - institutional holdings
+    o_score = 50
+    if stock_data['fii_holding'] > 15: o_score += 12
+    if stock_data['dii_holding'] > 20: o_score += 10
+    if stock_data['promoter_holding'] > 50 and stock_data['promoter_holding'] < 70: o_score += 15
+    if stock_data['mutual_fund_holding'] > 15: o_score += 13
+    o_score = min(100, max(0, o_score))
+    
+    # Quality Pillar (Q) - business quality metrics
+    q_score = 50
+    if stock_data['roe'] > 18: q_score += 15
+    if stock_data['asset_turnover'] > 1.0: q_score += 12
+    if stock_data['interest_coverage'] > 5: q_score += 10
+    if stock_data['cash_conversion_cycle'] < 60: q_score += 8
+    if stock_data['profit_growth'] > 15: q_score += 5
+    q_score = min(100, max(0, q_score))
+    
+    # Sector Momentum Pillar (S) - sector relative performance
+    s_score = 50
+    if stock_data['sector_return_1m'] > 2: s_score += 12
+    if stock_data['sector_momentum'] > 0: s_score += 15
+    if stock_data['pe_ratio'] < stock_data['sector_pe']: s_score += 10
+    if stock_data['relative_strength'] > stock_data['sector_return_1m']: s_score += 13
+    s_score = min(100, max(0, s_score))
+    
+    return {
+        'F': f_score,
+        'T': t_score, 
+        'R': r_score,
+        'O': o_score,
+        'Q': q_score,
+        'S': s_score
+    }
+
+
+def create_demo_score_result(ticker: str, date: date, mode: str, pillar_scores: Dict, stock_data: Dict, config: ConfigManager):
+    """Create a demo ScoreOutput object."""
+    
+    # Get pillar weights for the mode
+    weights = config.get_pillar_weights(mode)
+    
+    # Calculate weighted score
+    weighted_score = sum(pillar_scores[pillar] * weights[pillar] for pillar in weights.keys())
+    
+    # Calculate simplified risk penalty
+    risk_penalty = 0
+    if stock_data['pledge_percentage'] > 15: risk_penalty += 3
+    if stock_data['volatility_30d'] > 40: risk_penalty += 2
+    if stock_data['liquidity_score'] < 0.5: risk_penalty += 2
+    if stock_data['debt_equity'] > 1.0: risk_penalty += 1.5
+    
+    # Apply risk penalty
+    final_score = max(0, weighted_score - risk_penalty)
+    
+    # Determine investment band
+    if final_score >= 75:
+        band = "Strong Buy"
+    elif final_score >= 65:
+        band = "Buy" 
+    elif final_score >= 50:
+        band = "Hold"
+    else:
+        band = "Avoid"
+    
+    # Create guardrails list (simplified)
+    guardrails = []
+    if stock_data['liquidity_score'] < 0.3: guardrails.append("Illiquidity")
+    if stock_data['pledge_percentage'] > 20: guardrails.append("PledgeCap") 
+    if risk_penalty > 5: guardrails.append("HighRiskCap")
+    
+    # Return structured result
+    return {
+        'ticker': ticker,
+        'date': date.strftime('%Y-%m-%d'),
+        'mode': mode,
+        'f_score': pillar_scores['F'],
+        't_score': pillar_scores['T'], 
+        'r_score': pillar_scores['R'],
+        'o_score': pillar_scores['O'],
+        'q_score': pillar_scores['Q'],
+        's_score': pillar_scores['S'],
+        'weighted_score': weighted_score,
+        'risk_penalty': risk_penalty,
+        'final_score': final_score,
+        'band': band,
+        'guardrails': guardrails,
+        'as_of': datetime.now().isoformat()
+    }
+
+
 def run_nse_scoring_demo():
     """Run the GreyOak scoring demo with 400 NSE stocks."""
     
