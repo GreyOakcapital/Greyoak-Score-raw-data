@@ -288,17 +288,34 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(router)
 
 
+# Register API routes first
+app.include_router(router)
+
+
 @app.get("/", tags=["root"])
+@limiter.exempt  # Exempt root endpoint from rate limiting
 async def root():
     """
-    Root endpoint providing API information and navigation.
+    Root endpoint providing API information and navigation (CP7 Enhanced).
     
-    Returns basic API information and links to documentation.
+    Returns comprehensive API information including security features.
     """
     return {
         "service": "GreyOak Score API",
         "version": greyoak_score.__version__,
-        "description": "Professional stock scoring engine for Indian equities",
+        "description": "Production-ready stock scoring engine for Indian equities (CP7)",
+        "features": {
+            "security": {
+                "rate_limiting": "60 req/min per IP",
+                "cors_protection": "Configurable origins",
+                "trusted_hosts": "Host header validation",
+                "connection_pooling": "2-20 database connections"
+            },
+            "monitoring": {
+                "infrastructure_health": "GET /health",
+                "application_health": "GET /api/v1/health"
+            }
+        },
         "documentation": {
             "swagger_ui": "/docs",
             "redoc": "/redoc",
@@ -310,22 +327,36 @@ async def root():
             "get_by_band": "GET /api/v1/scores/band/{band}",
             "health_check": "GET /api/v1/health"
         },
-        "modes": ["Trader", "Investor"],
-        "bands": ["Strong Buy", "Buy", "Hold", "Avoid"]
+        "configuration": {
+            "modes": ["Trader", "Investor"],
+            "bands": ["Strong Buy", "Buy", "Hold", "Avoid"],
+            "pillars": ["F", "T", "R", "O", "Q", "S"]
+        },
+        "environment": {
+            "app_env": os.getenv('APP_ENV', 'unknown'),
+            "mode": os.getenv('MODE', 'unknown')
+        }
     }
 
 
 @app.get("/health", tags=["monitoring"])
-async def health_check():
+@limiter.exempt  # Exempt health endpoint from rate limiting
+async def infrastructure_health():
     """
-    Simple health check endpoint for monitoring and load balancers.
+    Infrastructure health check endpoint (CP7).
     
-    Returns basic health status without database connectivity check.
+    For load balancers, monitoring systems, and Kubernetes health checks.
+    Returns basic status without database connectivity check for fast response.
+    
+    This endpoint is exempt from rate limiting and should always be accessible.
     """
     return {
         "status": "healthy",
         "service": "greyoak-score-api",
-        "version": greyoak_score.__version__
+        "version": greyoak_score.__version__,
+        "timestamp": int(time.time()),
+        "environment": os.getenv('APP_ENV', 'unknown'),
+        "check_type": "infrastructure"
     }
 
 
