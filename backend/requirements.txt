@@ -90,3 +90,5 @@ websockets==15.0.1
 yfinance==0.2.32
 alembic==1.13.0
 slowapi==0.1.9
+psutil==5.9.6
+httpx==0.24.1
