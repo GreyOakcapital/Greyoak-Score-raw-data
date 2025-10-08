@@ -135,7 +135,7 @@ class SectorData(BaseModel):
     """Sector-level aggregated data (computed on-the-fly)."""
 
     sector_group: str = Field(..., description="Sector group (e.g., 'metals', 'banks')")
-    date: date = Field(..., description="Trading date")
+    trading_date: date = Field(..., description="Trading date", alias="date")
     
     # Sector returns
     ret_21d: float = Field(..., description="Sector 21-day return")
