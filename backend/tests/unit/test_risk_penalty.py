@@ -92,7 +92,7 @@ class TestRiskPenaltyCalculator:
             'close': 100.0,
             'volume': 50000,
             'median_traded_value_cr': 1.0,  # Low MTV
-            'sigma20': 0.08  # High volatility
+            'sigma20': 0.12  # High volatility (above 2.5 × 0.04 = 0.10 for metals)
         })
         
         high_risk_fundamentals = pd.Series({
