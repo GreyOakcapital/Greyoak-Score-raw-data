@@ -74,13 +74,13 @@ def load_prices_csv(filepath: Path) -> pd.DataFrame:
 
 
 def load_fundamentals_csv(filepath: Path) -> pd.DataFrame:
-    """Load and validate fundamentals.csv.
+    """Load fundamentals data with required and optional metrics.
     
     Args:
-        filepath: Path to fundamentals.csv.
+        filepath: Path to fundamentals CSV file.
         
     Returns:
-        Validated DataFrame with fundamentals data.
+        DataFrame with validated fundamentals data.
         
     Raises:
         FileNotFoundError: If file doesn't exist.
@@ -95,15 +95,29 @@ def load_fundamentals_csv(filepath: Path) -> pd.DataFrame:
     df = pd.read_csv(filepath)
     logger.info(f"  Raw data: {len(df)} rows, {len(df.columns)} columns")
     
-    # Convert date
+    # Validate required columns
+    required_cols = {"ticker", "quarter_end"}
+    missing_cols = required_cols - set(df.columns)
+    if missing_cols:
+        raise ValueError(f"Missing required fundamentals columns: {sorted(missing_cols)}")
+    
+    # Log optional columns that are missing (for informational purposes)
+    optional_cols = {
+        "roe_3y", "roce_3y", "eps_cagr_3y", "sales_cagr_3y", "pe", "ev_ebitda", 
+        "opm_stdev_12q", "roa_3y", "roe_3y_banking", "gnpa_pct", "pcr_pct", "nim_3y"
+    }
+    available_optional = optional_cols.intersection(set(df.columns))
+    missing_optional = optional_cols - set(df.columns)
+    logger.info(f"  📊 Available metrics: {len(available_optional)}/{len(optional_cols)}")
+    if missing_optional:
+        logger.info(f"  ⚠️  Missing optional metrics: {sorted(missing_optional)}")
+    
+    # Convert quarter_end to datetime
     df["quarter_end"] = pd.to_datetime(df["quarter_end"]).dt.date
     
-    # Validate schema (sample validation)
+    # Validate schema (sample validation on first row)
     try:
         first_row = df.iloc[0].to_dict()
-        # Remove roe_3y_banking if present (not in model)
-        if "roe_3y_banking" in first_row:
-            del first_row["roe_3y_banking"]
         FundamentalsData(**first_row)
         logger.info(f"  ✅ Schema validated")
     except Exception as e:
