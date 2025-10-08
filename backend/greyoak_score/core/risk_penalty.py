@@ -90,7 +90,7 @@ def calculate_risk_penalty(
     breakdown['event'] = event_penalty
     
     # 5. GOVERNANCE PENALTY
-    gov_penalty = _calculate_governance_penalty(fundamentals_data, rp_config)
+    gov_penalty = _calculate_governance_penalty(fundamentals_data, config)
     breakdown['governance'] = gov_penalty
     
     # 6. SUM AND APPLY SECTOR-SPECIFIC CAP
