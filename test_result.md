@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement CP5 of GreyOak Score Engine - Risk Penalty Calculator, Guardrails Engine, and Final Scoring & Banding Engine with comprehensive testing including RELIANCE golden test"
+user_problem_statement: "Test the GreyOak Score CP6 implementation - PostgreSQL Persistence & FastAPI API layer"
 
 backend:
   - task: "Risk Penalty Calculator"
