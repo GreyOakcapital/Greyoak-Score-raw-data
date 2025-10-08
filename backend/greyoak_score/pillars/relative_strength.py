@@ -253,8 +253,8 @@ class RelativeStrengthPillar(BasePillar):
         stock_return = stock_row.get(return_col)
         stock_vol = stock_row.get(vol_col)
         
-        # Handle missing data
-        if pd.isna(stock_return) or pd.isna(stock_vol) or stock_vol <= 0:
+        # Handle missing data and near-zero volatility
+        if pd.isna(stock_return) or pd.isna(stock_vol) or stock_vol <= 1e-8:
             return 0.0, {
                 "stock_return": stock_return,
                 "stock_volatility": stock_vol,
