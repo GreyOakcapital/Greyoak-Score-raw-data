@@ -83,7 +83,9 @@ class CP5BackendTester:
         
         try:
             from greyoak_score.core.config_manager import ConfigManager
-            config = ConfigManager()
+            from pathlib import Path
+            config_dir = Path(__file__).parent / "backend" / "configs"
+            config = ConfigManager(config_dir)
             self.log_test("Config Manager", True, "Successfully created ConfigManager instance")
         except Exception as e:
             self.log_test("Config Manager", False, f"Config creation failed: {str(e)}")
