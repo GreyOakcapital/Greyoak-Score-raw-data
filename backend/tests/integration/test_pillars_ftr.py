@@ -142,15 +142,20 @@ class TestPillarsFTRIntegration:
         clean_prices, clean_fund, clean_own, _, _ = clean_data
         sector_map_df = clean_prices.groupby('ticker')['sector_group'].first().reset_index()
         
+        # Remove sector_group from data to avoid merge conflicts
+        clean_prices_no_sector = clean_prices.drop(columns=['sector_group'], errors='ignore')
+        clean_fund_no_sector = clean_fund.drop(columns=['sector_group'], errors='ignore')
+        clean_own_no_sector = clean_own.drop(columns=['sector_group'], errors='ignore')
+        
         # Create all three pillars
         f_pillar = FundamentalsPillar(config_manager)
         t_pillar = TechnicalsPillar(config_manager)
         r_pillar = RelativeStrengthPillar(config_manager)
         
         # Calculate all scores
-        f_scores = f_pillar.calculate(clean_prices, clean_fund, clean_own, sector_map_df)
-        t_scores = t_pillar.calculate(clean_prices, clean_fund, clean_own, sector_map_df)
-        r_scores = r_pillar.calculate(clean_prices, clean_fund, clean_own, sector_map_df)
+        f_scores = f_pillar.calculate(clean_prices_no_sector, clean_fund_no_sector, clean_own_no_sector, sector_map_df)
+        t_scores = t_pillar.calculate(clean_prices_no_sector, clean_fund_no_sector, clean_own_no_sector, sector_map_df)
+        r_scores = r_pillar.calculate(clean_prices_no_sector, clean_fund_no_sector, clean_own_no_sector, sector_map_df)
         
         # Check all have same tickers (where data available)
         f_tickers = set(f_scores['ticker'])
