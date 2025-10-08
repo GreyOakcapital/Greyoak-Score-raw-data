@@ -19,12 +19,12 @@ from pathlib import Path
 from greyoak_score.core.config_manager import ConfigManager
 from greyoak_score.core.risk_penalty import calculate_risk_penalty
 from greyoak_score.core.guardrails import apply_guardrails
-from greyoak_score.pillars.fundamentals import calculate_fundamentals_pillar
-from greyoak_score.pillars.technicals import calculate_technicals_pillar
-from greyoak_score.pillars.relative_strength import calculate_relative_strength_pillar
-from greyoak_score.pillars.ownership import calculate_ownership_pillar
-from greyoak_score.pillars.quality import calculate_quality_pillar
-from greyoak_score.pillars.sector_momentum import calculate_sector_momentum_pillar
+from greyoak_score.pillars.fundamentals import FundamentalsPillar
+from greyoak_score.pillars.technicals import TechnicalsPillar
+from greyoak_score.pillars.relative_strength import RelativeStrengthPillar
+from greyoak_score.pillars.ownership import OwnershipPillar
+from greyoak_score.pillars.quality import QualityPillar
+from greyoak_score.pillars.sector_momentum import SectorMomentumPillar
 from greyoak_score.data.models import ScoreOutput, PillarScores
 from greyoak_score.utils.logger import get_logger
 
