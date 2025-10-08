@@ -266,6 +266,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "MIXED: Application health endpoint /api/v1/health working correctly with component status (DB: unhealthy, API: healthy, Overall: degraded). However, infrastructure health endpoint /health returns frontend HTML instead of backend JSON due to routing misconfiguration. Backend has @app.get('/health') but infrastructure routes it to frontend."
+      - working: false
+        agent: "testing"
+        comment: "PARTIAL FIX: Application health endpoint /api/v1/health working perfectly with proper JSON response (Overall: degraded, DB: unhealthy, API: healthy). However, infrastructure health endpoint /health still returns frontend HTML instead of backend JSON - this is an infrastructure routing issue, not a backend code issue. Backend code is correct but Kubernetes/ingress routing needs configuration."
 
   - task: "CP7 Production Configuration"
     implemented: true
