@@ -437,18 +437,7 @@ def run_nse_scoring_demo():
                             print(f"   Debug - First error for {ticker}: {e}")
                         continue
                     
-                    if score_result:
-                        # Add some additional metrics for analysis
-                        result = score_result.dict()
-                        result['market_cap'] = ticker_data['market_cap']
-                        result['sector'] = ticker_data['sector']
-                        result['pe_ratio'] = ticker_data['pe_ratio']
-                        result['roe'] = ticker_data['roe']
-                        mode_results.append(result)
-                        
-                except Exception as e:
-                    # Skip problematic stocks (expected with simulated data)
-                    continue
+                    # This section is now handled above in the try block
             
             # Progress indication
             progress = (batch_idx + 1) / total_batches * 100
