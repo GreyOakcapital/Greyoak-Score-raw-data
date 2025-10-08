@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the GreyOak Score CP6 implementation - PostgreSQL Persistence & FastAPI API layer"
+user_problem_statement: "Implement CP7 - Production Readiness: Docker hardening, Alembic migrations, security enhancements, performance testing, and comprehensive documentation"
 
 backend:
   - task: "PostgreSQL Persistence Layer"
