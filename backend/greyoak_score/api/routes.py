@@ -22,6 +22,7 @@ from greyoak_score.api.schemas import (
     ScoreRequest, ScoreResponse, HealthResponse, 
     ErrorResponse, StocksByBandResponse
 )
+import greyoak_score
 from greyoak_score.data.persistence import get_database
 from greyoak_score.core.scoring import calculate_greyoak_score
 from greyoak_score.data.models import ScoreOutput, PillarScores
