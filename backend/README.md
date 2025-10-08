@@ -2,7 +2,7 @@
 
 **Deterministic, sector-aware stock scoring engine for NSE/BSE equities**
 
-Version: 1.0.0 | Status: Phase 1 (CP1 Complete)
+Version: 1.0.0 | Status: Phase 1 (CP3 Complete - F, T, R Pillars)
 
 ---
 
