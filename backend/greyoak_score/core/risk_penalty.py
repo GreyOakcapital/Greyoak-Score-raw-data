@@ -57,8 +57,8 @@ def calculate_risk_penalty(
     
     breakdown = {}
     
-    # Get RP configuration
-    rp_config = config.get_risk_penalty_config()
+    # Get RP configuration components
+    breakdown = {}
     
     # 1. LIQUIDITY PENALTY (MTV-based)
     mtv_cr = prices_data.get('median_traded_value_cr', np.nan)
