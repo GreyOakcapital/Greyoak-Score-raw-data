@@ -173,6 +173,7 @@ def calculate_greyoak_score(
     
     score_output = ScoreOutput(
         ticker=ticker,
+        date=scoring_date.date(),  # Use date for scoring_date field
         score=round(final_score, 2),
         band=final_band,
         pillars=pillars,
@@ -180,8 +181,7 @@ def calculate_greyoak_score(
         guardrail_flags=guardrail_flags,
         confidence=round(confidence, 3),
         s_z=round(s_z, 3),
-        sector_group=sector_group,
-        mode=mode,
+        mode=mode.capitalize(),  # Capitalize mode
         as_of=scoring_date,
         config_hash=config.config_hash
     )
