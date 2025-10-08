@@ -409,6 +409,7 @@ class TestUtilityFunctions:
         """Test score explanation with no penalties or guardrails."""
         score_output = ScoreOutput(
             ticker="GOODSTOCK",
+            date=datetime.now(timezone.utc).date(),
             score=85.0,
             band="Strong Buy",
             pillars=PillarScores(F=80, T=90, R=85, O=80, Q=88, S=82),
@@ -416,8 +417,7 @@ class TestUtilityFunctions:
             guardrail_flags=[],
             confidence=0.95,
             s_z=1.5,
-            sector_group="it",
-            mode="investor",
+            mode="Investor",
             as_of=datetime.now(timezone.utc),
             config_hash="abc123"
         )
