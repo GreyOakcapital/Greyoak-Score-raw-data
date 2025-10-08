@@ -55,11 +55,14 @@ db = get_database()
     responses={
         400: {"model": ErrorResponse, "description": "Invalid input parameters"},
         404: {"model": ErrorResponse, "description": "Stock data not found"},
+        429: {"model": ErrorResponse, "description": "Rate limit exceeded"},
         500: {"model": ErrorResponse, "description": "Internal server error"}
     },
-    summary="Calculate GreyOak Score",
-    description="""
-    Calculate a complete GreyOak Score for a stock.
+    summary="Calculate GreyOak Score (Rate Limited)",
+    description=f"""
+    Calculate a complete GreyOak Score for a stock with CP7 rate limiting.
+    
+    **Rate Limiting:** {rate_limit_per_minute} requests per minute per IP address.
     
     **Process:**
     1. Validates input parameters (ticker format, date, mode)
@@ -74,7 +77,8 @@ db = get_database()
     In production, it would load raw data and calculate pillars dynamically.
     """
 )
-async def calculate_score_endpoint(request: ScoreRequest):
+@limiter.limit(rate_limit)
+async def calculate_score_endpoint(request_obj: Request, request: ScoreRequest):
     """
     Calculate GreyOak Score for a stock.
     
