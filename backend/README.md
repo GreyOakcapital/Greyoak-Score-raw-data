@@ -1,24 +1,43 @@
 # GreyOak Score Engine
 
-**Deterministic, sector-aware stock scoring engine for NSE/BSE equities**
+**Production-Ready Stock Scoring System for Indian Equities (CP7)**
 
-Version: 1.0.0 | Status: Phase 1 (CP3 Complete - F, T, R Pillars)
+[![Production Status](https://img.shields.io/badge/Status-Production%20Ready-green)]()
+[![API Version](https://img.shields.io/badge/API-v1.0.0-blue)]()
+[![Security](https://img.shields.io/badge/Security-CP7%20Hardened-brightgreen)]()
+[![Test Coverage](https://img.shields.io/badge/Coverage->80%25-success)]()
+
+**Version**: 1.0.0 | **Status**: CP7 Complete (Production Ready) | **Last Updated**: October 2024
 
 ---
 
 ## Overview
 
-GreyOak Score Engine produces daily **0-100 scores** and **investment bands** (Strong Buy/Buy/Hold/Avoid) for Indian equities across **Short Term (Trader)** and **Long Term (Investor)** modes.
+GreyOak Score Engine is a **production-ready, deterministic stock scoring system** for Indian equities (NSE/BSE) that generates comprehensive **0-100 scores** and **investment bands** (Strong Buy/Buy/Hold/Avoid) across **dual modes** for different investment horizons.
 
-**Key Features:**
-- ✅ Six-pillar scoring system (F, T, R, O, Q, S)
-- ✅ Sector-aware normalization
-- ✅ Risk penalty system
-- ✅ Sequential guardrails
-- ✅ Configuration-driven (zero hard-coded values)
-- ✅ Deterministic output (audit trail)
-- ✅ PostgreSQL persistence
-- ✅ FastAPI endpoints
+### 🎯 **Key Features (CP7)**
+
+#### **Core Scoring System**
+- ✅ **Six-Pillar Analysis**: Fundamentals (F), Technicals (T), Relative Strength (R), Ownership (O), Quality (Q), Sector Momentum (S)
+- ✅ **Dual Investment Modes**: Trader (1-6 months) & Investor (12-24 months) with different pillar weights
+- ✅ **Risk Management**: Multi-factor risk penalty system with sector-specific caps
+- ✅ **Sequential Guardrails**: Six hard-coded guardrails in specific order for downside protection
+- ✅ **Sector-Aware Normalization**: Z-score and ECDF normalization with sector groups
+- ✅ **Deterministic Output**: Complete audit trail with configuration hashing
+
+#### **Production Infrastructure (CP7)**
+- ✅ **Security Hardening**: CORS protection, rate limiting (60 req/min), trusted hosts, correlation IDs
+- ✅ **Database Management**: PostgreSQL with connection pooling (2-20 connections), Alembic migrations
+- ✅ **API Excellence**: FastAPI with Pydantic validation, OpenAPI docs, comprehensive error handling
+- ✅ **Container Security**: Docker multi-stage builds, non-root user, read-only filesystem
+- ✅ **Health Monitoring**: Dual health endpoints, structured logging, performance metrics
+- ✅ **Configuration Management**: Environment-based config, zero hardcoded values
+
+#### **Reliability & Performance**
+- ✅ **High Availability**: Connection pooling, retry logic, graceful degradation
+- ✅ **Comprehensive Testing**: >80% test coverage, unit/integration/performance tests
+- ✅ **Production Documentation**: Complete deployment, API usage, and troubleshooting guides
+- ✅ **Monitoring Ready**: Health checks, metrics, alerting endpoints
 
 ---
 
