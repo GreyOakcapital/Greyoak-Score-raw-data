@@ -137,19 +137,21 @@ def _calculate_liquidity_penalty(
     return 10.0
 
 
-def _calculate_pledge_penalty(pledge_frac: float, config: Dict) -> float:
+def _calculate_pledge_penalty(pledge_frac: float, config: ConfigManager) -> float:
     """Calculate pledge penalty for RP (separate from O pillar penalty)."""
     if pd.isna(pledge_frac) or pledge_frac < 0:
         pledge_frac = 0.0
     
-    pledge_config = config.get("pledge_bins", {})
+    # Get pledge penalty bins (sorted descending by threshold)
+    pledge_bins = config.get_pledge_bins()
     
-    if pledge_frac > pledge_config.get("high", 0.25):
-        return 10.0
-    elif pledge_frac > pledge_config.get("medium", 0.10):
-        return 5.0
-    else:
-        return 0.0
+    # Find applicable penalty
+    for bin_config in pledge_bins:
+        if pledge_frac > bin_config["threshold"]:
+            return float(bin_config["penalty"])
+    
+    # No penalty if below all thresholds
+    return 0.0
 
 
 def _calculate_volatility_penalty(
