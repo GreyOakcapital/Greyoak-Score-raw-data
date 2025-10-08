@@ -35,8 +35,8 @@ from greyoak_score.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
+# Initialize rate limiter with headers enabled (CP7 fix)
+limiter = Limiter(key_func=get_remote_address, headers_enabled=True)
 
 # Get rate limit from environment
 rate_limit_per_minute = os.getenv('RATE_LIMIT', '60')
