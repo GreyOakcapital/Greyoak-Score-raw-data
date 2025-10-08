@@ -597,12 +597,36 @@ class ScoreDatabase:
             logger.error(f"Row data: {dict(row)}")
             raise ValueError(f"Invalid database row: {e}")
     
+    def get_pool_stats(self) -> Dict[str, Any]:
+        """
+        Get connection pool statistics for monitoring.
+        
+        Returns:
+            Dict with pool statistics
+        """
+        if not self._connection_pool:
+            return {"error": "Connection pool not initialized"}
+        
+        try:
+            # Note: psycopg2 pool doesn't expose detailed stats
+            # but we can provide basic configuration info
+            return {
+                "pool_configured": True,
+                "min_connections": self.min_conn,
+                "max_connections": self.max_conn,
+                "pool_timeout": self.pool_timeout,
+                "pool_closed": self._connection_pool.closed if hasattr(self._connection_pool, 'closed') else False
+            }
+        except Exception as e:
+            logger.error(f"Error retrieving pool stats: {e}")
+            return {"error": str(e)}
+    
     def get_database_stats(self) -> Dict[str, Any]:
         """
         Get database statistics for monitoring and debugging.
         
         Returns:
-            Dict with database statistics
+            Dict with database and pool statistics
         """
         try:
             with self.get_connection() as conn:
@@ -632,11 +656,14 @@ class ScoreDatabase:
                     
                     stats['band_distribution'] = dict(cur.fetchall())
                     
+                    # Add pool statistics
+                    stats['connection_pool'] = self.get_pool_stats()
+                    
                     return stats
                     
         except Exception as e:
             logger.error(f"Error retrieving database stats: {e}")
-            return {"error": str(e)}
+            return {"error": str(e), "connection_pool": self.get_pool_stats()}
 
 
 # Convenience singleton instance for easy access
