@@ -172,16 +172,15 @@ def _is_illiquid(mtv_cr: float, mode: str, config: ConfigManager) -> bool:
     if pd.isna(mtv_cr) or mtv_cr < 0:
         return True  # No/invalid MTV data is illiquid
     
-    # Get liquidity penalty bins and find lowest non-zero penalty threshold
+    # Get liquidity penalty bins and find the highest threshold with non-zero penalty
     liquidity_bins = config.get_liquidity_penalties(mode)
     
-    # Find the threshold where penalty becomes non-zero
-    # Bins are sorted descending, so we want the lowest threshold with penalty > 0
+    # Find the highest threshold where penalty > 0
+    # This gives us the illiquidity threshold
     illiquidity_threshold = 0.0
-    for bin_config in reversed(liquidity_bins):  # Reverse to go ascending
-        if bin_config["penalty"] > 0:
+    for bin_config in liquidity_bins:
+        if bin_config["penalty"] > 0 and bin_config["threshold"] > illiquidity_threshold:
             illiquidity_threshold = bin_config["threshold"]
-            break
     
     return mtv_cr < illiquidity_threshold
 
