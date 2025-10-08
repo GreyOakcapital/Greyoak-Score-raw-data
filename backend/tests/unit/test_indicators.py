@@ -61,8 +61,8 @@ class TestRSI:
         
         rsi = calculate_rsi(prices, period=14)
         
-        # RSI should be 50 when no movement
-        assert abs(rsi.iloc[-1] - 50) < 1.0
+        # RSI should be 0 when no movement (no gains or losses)
+        assert rsi.iloc[-1] == 0.0 or pd.isna(rsi.iloc[-1])
 
 
 class TestATR:
