@@ -230,26 +230,29 @@ def _calculate_event_penalty(
         return 0.0
 
 
-def _calculate_governance_penalty(fundamentals_data: pd.Series, config: Dict) -> float:
+def _calculate_governance_penalty(fundamentals_data: pd.Series, config: ConfigManager) -> float:
     """Calculate governance penalty (auditor flags, board changes)."""
     # In this implementation, we'll use simple proxies
     # In production, would have actual governance event data
     
     gov_penalty = 0.0
-    gov_config = config.get("governance", {})
+    gov_params = config.get_governance_penalties()
     
     # Check for financial stress indicators as proxy for governance issues
     # Low ROE could indicate governance issues
     roe = fundamentals_data.get('roe_3y', np.nan)
     if not pd.isna(roe) and roe < 0.05:  # Very low ROE
-        gov_penalty += gov_config.get("financial_stress", 1.0)
+        # Use auditor qualification penalty as proxy for financial stress
+        gov_penalty += gov_params.get("auditor_qualification", 2.0)
     
     # Check for high OPM volatility as proxy for management instability
-    opm_stdev = fundamentals_data.get('opm_stdev_12q', np.nan)
-    if not pd.isna(omp_stdev) and opm_stdev > 0.10:  # High OPM volatility
-        gov_penalty += gov_config.get("management_instability", 1.0)
+    omp_stdev = fundamentals_data.get('opm_stdev_12q', np.nan)
+    if not pd.isna(omp_stdev) and omp_stdev > 0.10:  # High OPM volatility
+        gov_penalty += gov_params.get("board_resignation", 1.0)
     
-    return min(gov_penalty, gov_config.get("max_penalty", 3.0))
+    # Cap at reasonable maximum (use auditor qualification penalty × 2 as max)
+    max_penalty = gov_params.get("auditor_qualification", 2.0) * 2
+    return min(gov_penalty, max_penalty)
 
 
 def get_risk_penalty_summary(
