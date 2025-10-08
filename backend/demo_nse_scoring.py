@@ -294,12 +294,12 @@ def run_nse_scoring_demo():
                     # Get stock data for this ticker
                     ticker_data = stock_data[stock_data['ticker'] == ticker].iloc[0].to_dict()
                     
-                    # Calculate GreyOak Score
-                    score_result = calculate_greyoak_score(
-                        ticker=ticker,
-                        date=scoring_date,
-                        mode=mode,
-                        config_manager=config_manager
+                    # Calculate pillar scores (simplified for demo)
+                    pillar_scores = calculate_demo_pillar_scores(ticker_data, mode)
+                    
+                    # Create a simplified score result for demo
+                    score_result = create_demo_score_result(
+                        ticker, scoring_date, mode, pillar_scores, ticker_data, config_manager
                     )
                     
                     if score_result:
