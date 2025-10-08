@@ -166,14 +166,46 @@ app = FastAPI(
     },
 )
 
-# Add middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure security middleware (CP7)
+def setup_security_middleware():
+    """Configure security middleware based on environment variables."""
+    
+    # 1. Rate Limiting Middleware
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
+    logger.info("✅ Rate limiting middleware configured")
+    
+    # 2. Trusted Host Middleware
+    trusted_hosts = os.getenv('TRUSTED_HOSTS')
+    if trusted_hosts:
+        hosts = [host.strip() for host in trusted_hosts.split(',')]
+        app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=hosts
+        )
+        logger.info(f"✅ Trusted hosts middleware configured: {hosts}")
+    else:
+        logger.warning("⚠️ TRUSTED_HOSTS not configured - all hosts allowed")
+    
+    # 3. CORS Middleware
+    cors_origins = os.getenv('CORS_ORIGINS')
+    if cors_origins:
+        origins = [origin.strip() for origin in cors_origins.split(',')]
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            allow_headers=["*"],
+        )
+        logger.info(f"✅ CORS middleware configured with origins: {origins}")
+    else:
+        # No CORS middleware added - more secure default
+        logger.warning("⚠️ CORS_ORIGINS not configured - CORS disabled (more secure)")
+
+# Apply security configuration
+setup_security_middleware()
 
 
 # Global exception handler
