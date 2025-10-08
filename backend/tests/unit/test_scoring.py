@@ -228,44 +228,32 @@ class TestDataQualityMetrics:
 class TestScoringEngine:
     """Test the main scoring engine."""
     
-    @patch('greyoak_score.core.scoring.calculate_fundamentals_pillar')
-    @patch('greyoak_score.core.scoring.calculate_technicals_pillar') 
-    @patch('greyoak_score.core.scoring.calculate_relative_strength_pillar')
-    @patch('greyoak_score.core.scoring.calculate_ownership_pillar')
-    @patch('greyoak_score.core.scoring.calculate_quality_pillar')
-    @patch('greyoak_score.core.scoring.calculate_sector_momentum_pillar')
     @patch('greyoak_score.core.scoring.calculate_risk_penalty')
     @patch('greyoak_score.core.scoring.apply_guardrails')
     def test_calculate_greyoak_score_complete_flow(
-        self, mock_guardrails, mock_rp, mock_s, mock_q, mock_o, mock_r, mock_t, mock_f,
-        config_manager, sample_prices_data, sample_fundamentals_data, 
-        sample_ownership_data, sample_sector_data, sample_market_data
+        self, mock_guardrails, mock_rp, config_manager, sample_prices_data, 
+        sample_fundamentals_data, sample_ownership_data
     ):
-        """Test complete scoring flow with mocked pillar calculations."""
-        # Mock pillar returns
-        mock_f.return_value = 75.0
-        mock_t.return_value = 80.0
-        mock_r.return_value = 70.0
-        mock_o.return_value = 85.0
-        mock_q.return_value = 78.0
-        mock_s.return_value = (82.0, 1.2)  # pillar_s, s_z
-        
+        """Test complete scoring flow with mocked components."""
         # Mock risk penalty
         mock_rp.return_value = (5.0, {'total_after_cap': 5.0})
         
         # Mock guardrails
         mock_guardrails.return_value = (75.0, "Strong Buy", [])  # score, band, flags
         
+        # Prepare pillar scores
+        pillar_scores = {'F': 75.0, 'T': 80.0, 'R': 70.0, 'O': 85.0, 'Q': 78.0, 'S': 82.0}
+        
         result = calculate_greyoak_score(
             ticker="TESTSTOCK",
+            pillar_scores=pillar_scores,
             prices_data=sample_prices_data,
             fundamentals_data=sample_fundamentals_data,
             ownership_data=sample_ownership_data,
-            sector_data=sample_sector_data,
-            market_data=sample_market_data,
             sector_group="it",
             mode="trader",
-            config=config_manager
+            config=config_manager,
+            s_z=1.2
         )
         
         # Verify result structure
