@@ -211,10 +211,10 @@ backend:
     status_history:
       - working: false
         agent: "testing"
-        comment: "CRITICAL: CORS middleware configured in code but headers not returned in responses. Environment variables CORS_ORIGINS may not be loaded properly. Tested with allowed origin 'https://greyoak-score-1.preview.emergentagent.com' but no access-control-allow-origin header returned. CORS preflight (OPTIONS) returns 405 Method Not Allowed."
+        comment: "CRITICAL: CORS middleware configured in code but headers not returned in responses. Environment variables CORS_ORIGINS may not be loaded properly. Tested with allowed origin 'https://greyoak-score-2.preview.emergentagent.com' but no access-control-allow-origin header returned. CORS preflight (OPTIONS) returns 405 Method Not Allowed."
       - working: true
         agent: "testing"
-        comment: "✅ FIXED: CORS implementation now working correctly. CORS headers present in responses (Access-Control-Allow-Origin: https://greyoak-score-1.preview.emergentagent.com). However, OPTIONS preflight still returns 405 Method Not Allowed instead of 200, but regular requests have proper CORS headers. Environment variable loading and middleware configuration resolved."
+        comment: "✅ FIXED: CORS implementation now working correctly. CORS headers present in responses (Access-Control-Allow-Origin: https://greyoak-score-2.preview.emergentagent.com). However, OPTIONS preflight still returns 405 Method Not Allowed instead of 200, but regular requests have proper CORS headers. Environment variable loading and middleware configuration resolved."
 
   - task: "CP7 Rate Limiting Implementation"
     implemented: true

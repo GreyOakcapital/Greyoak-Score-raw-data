@@ -15,7 +15,7 @@ class CP7FocusedTester:
     """Focused CP7 security tester"""
     
     def __init__(self):
-        self.base_url = "https://greyoak-score-1.preview.emergentagent.com"
+        self.base_url = "https://greyoak-score-2.preview.emergentagent.com"
         self.test_results = []
         self.failed_tests = []
         
@@ -48,7 +48,7 @@ class CP7FocusedTester:
         try:
             response = requests.get(
                 f"{self.base_url}/api/v1/health",
-                headers={"Origin": "https://greyoak-score-1.preview.emergentagent.com"},
+                headers={"Origin": "https://greyoak-score-2.preview.emergentagent.com"},
                 timeout=10
             )
             
