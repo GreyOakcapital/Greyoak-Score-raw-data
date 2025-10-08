@@ -382,7 +382,9 @@ async def get_scores_for_ticker(
     **Results:** Ordered by score DESC (best scores first within the band)
     """
 )
+@limiter.limit(rate_limit)
 async def get_stocks_by_band(
+    request: Request,
     band: str = Path(..., description="Investment band"),
     date: str = Query(..., description="Score date (YYYY-MM-DD)"),
     mode: str = Query(..., description="Scoring mode ('Trader' or 'Investor')"),
