@@ -77,7 +77,12 @@ class TestLoadPricesCSV:
         csv_file = tmp_path / "prices.csv"
         csv_file.write_text(csv_data)
         
-        with patch('greyoak_score.data.ingestion.add_missing_indicators', return_value=pd.read_csv(csv_file)):
+        # Mock add_missing_indicators to return processed data with proper dates
+        def mock_add_indicators(df):
+            df['date'] = pd.to_datetime(df['date']).dt.date
+            return df
+            
+        with patch('greyoak_score.data.ingestion.add_missing_indicators', side_effect=mock_add_indicators):
             df = load_prices_csv(csv_file)
         
         # Dates should be converted to date objects
