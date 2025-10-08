@@ -86,7 +86,7 @@ def calculate_risk_penalty(
     breakdown['volatility'] = vol_penalty
     
     # 4. EVENT WINDOW PENALTY
-    event_penalty = _calculate_event_penalty(ticker, fundamentals_data, scoring_date, rp_config)
+    event_penalty = _calculate_event_penalty(ticker, fundamentals_data, scoring_date, config)
     breakdown['event'] = event_penalty
     
     # 5. GOVERNANCE PENALTY
