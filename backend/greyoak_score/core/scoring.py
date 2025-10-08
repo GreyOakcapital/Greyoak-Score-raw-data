@@ -78,50 +78,21 @@ def calculate_greyoak_score(
         'scoring_date': scoring_date.isoformat()
     })
     
-    # Get sector group from mapping
-    if ticker in sector_map_df.index:
-        sector_group = sector_map_df.loc[ticker, 'sector_group']
-    else:
-        # Fallback if not in mapping
-        sector_group = 'diversified'
-    
     # Validate inputs
     _validate_inputs(ticker, prices_data, fundamentals_data, ownership_data, sector_group, mode)
     
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    # STEP 1: Calculate all six pillars
+    # STEP 1: Extract pillar scores from input
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     
-    logger.debug(f"Calculating pillars for {ticker}")
+    logger.debug(f"Using provided pillar scores for {ticker}")
     
-    # Initialize pillar calculators
-    f_pillar = FundamentalsPillar(config)
-    t_pillar = TechnicalsPillar(config)
-    r_pillar = RelativeStrengthPillar(config)
-    o_pillar = OwnershipPillar(config)
-    q_pillar = QualityPillar(config)
-    s_pillar = SectorMomentumPillar(config)
-    
-    # Calculate pillar scores (get scores for all stocks, then extract our ticker)
-    f_scores = f_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    t_scores = t_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    r_scores = r_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    o_scores = o_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    q_scores = q_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    s_scores = s_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
-    
-    # Extract scores for our ticker
-    pillar_f = f_scores.loc[ticker, f_pillar.pillar_name] if ticker in f_scores.index else 50.0
-    pillar_t = t_scores.loc[ticker, t_pillar.pillar_name] if ticker in t_scores.index else 50.0
-    pillar_r = r_scores.loc[ticker, r_pillar.pillar_name] if ticker in r_scores.index else 50.0
-    pillar_o = o_scores.loc[ticker, o_pillar.pillar_name] if ticker in o_scores.index else 50.0
-    pillar_q = q_scores.loc[ticker, q_pillar.pillar_name] if ticker in q_scores.index else 50.0
-    pillar_s = s_scores.loc[ticker, s_pillar.pillar_name] if ticker in s_scores.index else 50.0
-    
-    # Get sector momentum z-score for guardrails
-    # For now, use a simple proxy since we need the actual sector momentum calculation
-    # TODO: Extract S_z from sector momentum pillar properly
-    s_z = 0.0  # Placeholder - will be calculated in sector momentum pillar
+    pillar_f = pillar_scores.get('F', 50.0)
+    pillar_t = pillar_scores.get('T', 50.0)
+    pillar_r = pillar_scores.get('R', 50.0)
+    pillar_o = pillar_scores.get('O', 50.0)
+    pillar_q = pillar_scores.get('Q', 50.0)
+    pillar_s = pillar_scores.get('S', 50.0)
     
     pillars = PillarScores(
         F=round(pillar_f, 2),
