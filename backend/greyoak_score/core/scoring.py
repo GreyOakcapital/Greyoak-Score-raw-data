@@ -55,9 +55,10 @@ def calculate_greyoak_score(
         prices_data: Latest price/technical data for the stock
         fundamentals_data: Latest fundamental data for the stock
         ownership_data: Latest ownership/promoter data for the stock
-        sector_data: Price data for all stocks in the sector (for normalization)
-        market_data: Market benchmark data (NIFTY 50)
-        sector_group: Sector classification (e.g., "it", "banks", "metals")
+        all_prices_df: All price data for sector normalization
+        all_fundamentals_df: All fundamental data for sector normalization
+        all_ownership_df: All ownership data for sector normalization  
+        sector_map_df: Ticker to sector group mapping
         mode: Trading mode ("trader" or "investor")
         config: Configuration manager instance
         scoring_date: Date for scoring (defaults to current UTC time)
