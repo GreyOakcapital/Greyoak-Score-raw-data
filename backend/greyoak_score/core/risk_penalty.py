@@ -58,7 +58,6 @@ def calculate_risk_penalty(
     breakdown = {}
     
     # Get RP configuration components
-    breakdown = {}
     
     # 1. LIQUIDITY PENALTY (MTV-based)
     mtv_cr = prices_data.get('median_traded_value_cr', np.nan)
@@ -73,7 +72,7 @@ def calculate_risk_penalty(
         else:
             mtv_cr = 0.0
     
-    liq_penalty = _calculate_liquidity_penalty(mtv_cr, mode, rp_config)
+    liq_penalty = _calculate_liquidity_penalty(mtv_cr, mode, config)
     breakdown['liquidity'] = liq_penalty
     
     # 2. PLEDGE BINS (for RP, separate from O pillar)
