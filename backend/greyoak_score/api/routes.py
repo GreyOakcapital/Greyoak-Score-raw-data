@@ -14,7 +14,7 @@ Endpoints:
 
 from fastapi import APIRouter, HTTPException, Query, Path
 from typing import List, Optional
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 import re
 import psycopg2
 
