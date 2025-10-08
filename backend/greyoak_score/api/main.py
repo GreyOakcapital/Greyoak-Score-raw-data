@@ -359,10 +359,16 @@ async def infrastructure_health():
 # For debugging and development
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "greyoak_score.api.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
-    )
+    
+    # Development configuration
+    config = {
+        "app": "greyoak_score.api.main:app",
+        "host": "0.0.0.0",
+        "port": 8000,
+        "reload": True,
+        "log_level": "info",
+        "workers": 1
+    }
+    
+    logger.info(f"Starting development server with config: {config}")
+    uvicorn.run(**config)
