@@ -187,7 +187,7 @@ class FundamentalsPillar(BasePillar):
         logger.info("  🏦 Processing banking stocks...")
         
         # Get configuration
-        weights = self.config.get_banking_fundamentals_weights()
+        weights = self.config.get_fundamentals_weights(is_banking=True)
         
         # Define metrics and their direction
         metrics_config = {
