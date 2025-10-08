@@ -157,18 +157,19 @@ def _calculate_pledge_penalty(pledge_frac: float, config: ConfigManager) -> floa
 def _calculate_volatility_penalty(
     stock_sigma: float,
     sector_group: str,
-    config: Dict
+    config: ConfigManager
 ) -> float:
     """Calculate volatility penalty (stock vs sector sigma)."""
     if pd.isna(stock_sigma) or stock_sigma <= 0:
         return 0.0
     
-    # For now, use a simple threshold since we don't have sector medians
-    # TODO: In full implementation, would compare to actual sector median
-    volatility_config = config.get("volatility", {})
-    threshold_multiplier = volatility_config.get("threshold_multiplier", 2.5)
+    # Get volatility penalty parameters
+    vol_params = config.get_volatility_params()
+    threshold_multiplier = vol_params.get("multiplier", 2.5)
+    penalty = vol_params.get("penalty", 5.0)
     
     # Estimate sector volatility based on sector type
+    # TODO: In full implementation, would use actual sector median sigma
     sector_volatility_estimates = {
         "it": 0.02,
         "banks": 0.025,
@@ -176,13 +177,15 @@ def _calculate_volatility_penalty(
         "metals": 0.04,
         "energy": 0.035,
         "fmcg": 0.02,
-        "pharma": 0.025
+        "pharma": 0.025,
+        "psu_banks": 0.03,
+        "auto_caps": 0.03
     }
     
     estimated_sector_sigma = sector_volatility_estimates.get(sector_group, 0.03)
     
     if stock_sigma > threshold_multiplier * estimated_sector_sigma:
-        return 5.0
+        return float(penalty)
     else:
         return 0.0
 
