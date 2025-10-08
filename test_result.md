@@ -281,6 +281,9 @@ backend:
       - working: false
         agent: "testing"
         comment: "MIXED: Backend API root endpoint / configured with security features documentation, but infrastructure routing serves frontend HTML instead of backend JSON. Environment variables (CORS_ORIGINS, TRUSTED_HOSTS, RATE_LIMIT) configured in .env but may not be properly loaded by application."
+      - working: false
+        agent: "testing"
+        comment: "PARTIAL FIX: Environment variables (CORS_ORIGINS, TRUSTED_HOSTS, RATE_LIMIT) now properly loaded with explicit dotenv loading. CORS and rate limiting working correctly. However, root endpoint / still returns frontend HTML instead of backend JSON due to infrastructure routing configuration. Backend code is correct but needs infrastructure-level routing fix."
 
 metadata:
   created_by: "main_agent"
