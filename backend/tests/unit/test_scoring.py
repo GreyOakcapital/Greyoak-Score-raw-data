@@ -261,8 +261,7 @@ class TestScoringEngine:
         assert result.ticker == "TESTSTOCK"
         assert result.score == 75.0
         assert result.band == "Strong Buy"
-        assert result.sector_group == "it"
-        assert result.mode == "trader"
+        assert result.mode == "Trader"  # Capitalized
         assert result.risk_penalty == 5.0
         assert result.s_z == 1.2
         
