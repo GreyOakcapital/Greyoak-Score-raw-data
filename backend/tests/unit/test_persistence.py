@@ -15,7 +15,7 @@ def sample_score_output():
     """Create a sample ScoreOutput for testing."""
     return ScoreOutput(
         ticker="TESTSTOCK.NS",
-        date=date(2024, 10, 8),
+        scoring_date=date(2024, 10, 8),
         mode="Trader",
         score=75.5,
         band="Buy",
