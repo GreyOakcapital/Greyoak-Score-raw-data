@@ -79,10 +79,11 @@ class TestATR:
         
         atr = calculate_atr(df['high'], df['low'], df['close'], period=3)
         
-        # ATR should be positive
-        assert (atr >= 0).all()
+        # ATR should be positive (excluding NaN values)
+        valid_atr = atr.dropna()
+        assert (valid_atr >= 0).all()
         
-        # Should have NaN for first value
+        # Should have NaN for first few values (warmup period)
         assert pd.isna(atr.iloc[0])
         
         # Last values should be valid
