@@ -39,8 +39,8 @@ from greyoak_score.data.persistence import get_database, close_database
 
 logger = get_logger(__name__)
 
-# Initialize rate limiter
-limiter = Limiter(key_func=get_remote_address)
+# Initialize rate limiter with headers enabled (CP7 fix)
+limiter = Limiter(key_func=get_remote_address, headers_enabled=True)
 
 
 @asynccontextmanager
