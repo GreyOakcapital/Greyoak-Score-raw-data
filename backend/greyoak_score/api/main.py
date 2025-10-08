@@ -188,21 +188,36 @@ def setup_security_middleware():
     else:
         logger.warning("⚠️ TRUSTED_HOSTS not configured - all hosts allowed")
     
-    # 3. CORS Middleware
+    # 3. CORS Middleware (CP7 fix for environment variable loading)
     cors_origins = os.getenv('CORS_ORIGINS')
     if cors_origins:
-        origins = [origin.strip() for origin in cors_origins.split(',')]
+        # Parse comma-separated origins and strip whitespace
+        origins = [origin.strip() for origin in cors_origins.split(',') if origin.strip()]
         app.add_middleware(
             CORSMiddleware,
             allow_origins=origins,
             allow_credentials=True,
-            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
             allow_headers=["*"],
         )
         logger.info(f"✅ CORS middleware configured with origins: {origins}")
     else:
-        # No CORS middleware added - more secure default
-        logger.warning("⚠️ CORS_ORIGINS not configured - CORS disabled (more secure)")
+        # For development, allow localhost origins if no CORS_ORIGINS set
+        # In production, this should be explicitly configured
+        dev_origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000", 
+            "http://localhost:8000",
+            "http://127.0.0.1:8000"
+        ]
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=dev_origins,
+            allow_credentials=True,
+            allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
+            allow_headers=["*"],
+        )
+        logger.warning(f"⚠️ CORS_ORIGINS not configured - using development defaults: {dev_origins}")
 
 # Apply security configuration
 setup_security_middleware()
