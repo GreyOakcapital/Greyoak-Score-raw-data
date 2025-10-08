@@ -198,6 +198,14 @@ class OwnershipPillar(BasePillar):
         # Sort curve points by fraction
         sorted_points = sorted(pledge_curve, key=lambda x: x['fraction'])
         
+        # If beyond the highest point, use the highest penalty
+        if pledge_frac >= sorted_points[-1]['fraction']:
+            return sorted_points[-1]['penalty']
+        
+        # If below the lowest point, use the lowest penalty
+        if pledge_frac <= sorted_points[0]['fraction']:
+            return sorted_points[0]['penalty']
+        
         # Find the two points to interpolate between
         for i in range(len(sorted_points) - 1):
             x1, y1 = sorted_points[i]['fraction'], sorted_points[i]['penalty']
@@ -210,7 +218,7 @@ class OwnershipPillar(BasePillar):
                 penalty = y1 + (y2 - y1) * (pledge_frac - x1) / (x2 - x1)
                 return penalty
         
-        # If beyond the curve, use the last point's penalty
+        # Fallback (shouldn't reach here)
         return sorted_points[-1]['penalty']
     
     def _calculate_fii_dii_component(self, row: pd.Series, all_data: pd.DataFrame) -> float:
