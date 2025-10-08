@@ -34,8 +34,8 @@ from datetime import datetime, timedelta
 
 import requests
 
-# Test Configuration
-BASE_URL = "http://localhost:8001"  # Backend runs on 8001
+# Test Configuration  
+BASE_URL = "http://0.0.0.0:8001"  # Backend runs on 8001 (bind to all interfaces)
 TEST_TIMEOUT = 30  # seconds
 PERFORMANCE_SAMPLES = 50  # Number of requests per performance test
 CONCURRENT_USERS = 25  # Concurrent request simulation
