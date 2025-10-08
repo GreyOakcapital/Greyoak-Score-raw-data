@@ -48,29 +48,61 @@ async def lifespan(app: FastAPI):
     """
     Application lifespan manager for startup and shutdown events.
     
-    Handles:
-    - Database connection testing on startup
-    - Resource cleanup on shutdown
+    CP7 Startup:
+    - Database connection pool initialization with retry logic
+    - Environment configuration validation
+    - Security middleware configuration logging
+    - Health check system initialization
+    
+    CP7 Shutdown:
+    - Database connection pool cleanup
+    - Graceful resource cleanup
+    - Audit logging of shutdown
     """
     # Startup
-    logger.info("Starting GreyOak Score API")
+    start_time = time.time()
+    logger.info("🚀 Starting GreyOak Score API with CP7 enhancements")
     
-    # Test database connection
+    # Log environment configuration (without secrets)
+    env_config = {
+        'app_env': os.getenv('APP_ENV', 'unknown'),
+        'mode': os.getenv('MODE', 'unknown'),
+        'log_level': os.getenv('LOG_LEVEL', 'INFO'),
+        'rate_limit': os.getenv('RATE_LIMIT', '60'),
+        'cors_enabled': bool(os.getenv('CORS_ORIGINS')),
+        'trusted_hosts_enabled': bool(os.getenv('TRUSTED_HOSTS')),
+        'pool_config': f"{os.getenv('DB_POOL_MIN_CONN', '2')}-{os.getenv('DB_POOL_MAX_CONN', '20')}"
+    }
+    logger.info(f"Environment configuration: {env_config}")
+    
+    # Initialize database connection pool with enhanced error handling
     try:
         db = get_database()
         if db.test_connection():
-            logger.info("Database connection test successful")
+            pool_stats = db.get_pool_stats()
+            logger.info(f"✅ Database connection pool initialized: {pool_stats}")
         else:
-            logger.warning("Database connection test failed - API will start but database operations may fail")
+            logger.warning("⚠️ Database connection test failed - API will start but database operations may fail")
     except Exception as e:
-        logger.error(f"Database initialization error: {e}")
+        logger.error(f"❌ Database initialization error: {e}")
+        logger.warning("API starting in degraded mode - database operations will fail")
     
-    logger.info(f"GreyOak Score API v{greyoak_score.__version__} started successfully")
+    startup_time = time.time() - start_time
+    logger.info(f"🎯 GreyOak Score API v{greyoak_score.__version__} started successfully in {startup_time:.2f}s")
     
     yield
     
     # Shutdown
-    logger.info("Shutting down GreyOak Score API")
+    logger.info("🛑 Shutting down GreyOak Score API")
+    
+    # Cleanup database connection pool
+    try:
+        close_database()
+        logger.info("✅ Database connection pool closed successfully")
+    except Exception as e:
+        logger.error(f"❌ Error closing database pool: {e}")
+    
+    logger.info("👋 GreyOak Score API shutdown complete")
 
 
 # Initialize FastAPI application
