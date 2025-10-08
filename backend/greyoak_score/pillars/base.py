@@ -125,13 +125,14 @@ class BasePillar(ABC):
         Returns:
             DataFrame with latest record per ticker
         """
-        if 'trading_date' in df.columns:
-            date_col = 'trading_date'
-        elif 'scoring_date' in df.columns:
-            date_col = 'scoring_date'
-        elif 'quarter_end' in df.columns:
-            date_col = 'quarter_end'
-        else:
+        # Check for various date column names
+        date_col = None
+        for col_name in ['date', 'trading_date', 'scoring_date', 'quarter_end']:
+            if col_name in df.columns:
+                date_col = col_name
+                break
+        
+        if date_col is None:
             # If no date column, assume already filtered
             return df.drop_duplicates('ticker', keep='last')
         
