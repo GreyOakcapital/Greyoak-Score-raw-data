@@ -188,7 +188,7 @@ class ScoreOutput(BaseModel):
 
     # Identifiers
     ticker: str = Field(..., description="Stock ticker symbol")
-    date: date = Field(..., description="Scoring date")
+    scoring_date: date = Field(..., description="Scoring date", alias="date")
     mode: Literal["Trader", "Investor"] = Field(
         ...,
         description="Scoring mode (Trader = short-term, Investor = long-term)",
