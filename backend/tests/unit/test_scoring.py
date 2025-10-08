@@ -432,16 +432,16 @@ class TestUtilityFunctions:
         """Test score comparison functionality."""
         scores = {
             'STOCK1': ScoreOutput(
-                ticker="STOCK1", score=75.0, band="Buy",
+                ticker="STOCK1", date=datetime.now(timezone.utc).date(), score=75.0, band="Buy",
                 pillars=PillarScores(F=70, T=80, R=75, O=70, Q=85, S=75),
                 risk_penalty=5.0, guardrail_flags=[], confidence=0.85, s_z=1.2,
-                sector_group="it", mode="trader", as_of=datetime.now(timezone.utc), config_hash="abc123"
+                mode="Trader", as_of=datetime.now(timezone.utc), config_hash="abc123"
             ),
             'STOCK2': ScoreOutput(
-                ticker="STOCK2", score=82.0, band="Strong Buy",
+                ticker="STOCK2", date=datetime.now(timezone.utc).date(), score=82.0, band="Strong Buy",
                 pillars=PillarScores(F=80, T=85, R=80, O=85, Q=90, S=80),
                 risk_penalty=2.0, guardrail_flags=[], confidence=0.90, s_z=1.8,
-                sector_group="banks", mode="trader", as_of=datetime.now(timezone.utc), config_hash="abc123"
+                mode="Trader", as_of=datetime.now(timezone.utc), config_hash="abc123"
             )
         }
         
