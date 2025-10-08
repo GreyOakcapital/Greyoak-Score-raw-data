@@ -1,30 +1,46 @@
 """
-FastAPI application for GreyOak Score Engine.
+FastAPI application for GreyOak Score Engine - Production Hardened (CP7).
 
-This module initializes the FastAPI application with proper configuration,
-middleware, exception handling, and route registration.
+This module initializes the FastAPI application with comprehensive security,
+monitoring, and production-ready features.
 
-Key Features:
-- RESTful API endpoints for score calculation and retrieval
-- Automatic OpenAPI/Swagger documentation
-- Input validation with Pydantic models
-- Proper error handling and HTTP status codes
-- CORS support for web applications
-- Health check endpoints for monitoring
+CP7 Features:
+- Security hardening (CORS, Rate Limiting, Trusted Hosts)
+- Dual health endpoints (/health for infra, /api/v1/health for app)
+- Connection pooling with retry logic
+- Structured JSON logging with request correlation
+- Graceful shutdown with resource cleanup
+- Environment-based configuration
+- Performance monitoring and metrics
 """
 
-from fastapi import FastAPI, Request
+import os
+from typing import List, Optional
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
+import time
 from contextlib import asynccontextmanager
+
+# Rate limiting
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 import greyoak_score
 from greyoak_score.api.routes import router
 from greyoak_score.utils.logger import get_logger
-from greyoak_score.data.persistence import get_database
+from greyoak_score.data.persistence import get_database, close_database
 
 logger = get_logger(__name__)
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
