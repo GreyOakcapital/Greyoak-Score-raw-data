@@ -105,89 +105,101 @@
 user_problem_statement: "Test the GreyOak Score CP6 implementation - PostgreSQL Persistence & FastAPI API layer"
 
 backend:
-  - task: "Risk Penalty Calculator"
+  - task: "PostgreSQL Persistence Layer"
     implemented: true
     working: true
-    file: "/app/backend/greyoak_score/core/risk_penalty.py"
+    file: "/app/backend/greyoak_score/data/persistence.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: true
-        agent: "main"
-        comment: "Successfully implemented with liquidity, pledge, volatility, event, and governance penalties. Fixed config method usage and typo. All 20 unit tests passing with 89% coverage."
-
-  - task: "Guardrails Engine"
-    implemented: true
-    working: true
-    file: "/app/backend/greyoak_score/core/guardrails.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Successfully implemented with hard-coded sequential order: LowDataHold→Illiquidity→PledgeCap→HighRiskCap→SectorBear→LowCoverage. Fixed illiquidity logic and string formatting. All 21 unit tests passing with 97% coverage."
-
-  - task: "Final Scoring Engine"
-    implemented: true
-    working: true
-    file: "/app/backend/greyoak_score/core/scoring.py"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Just implemented the main scoring orchestrator that combines all pillars, applies weights, calculates RP, applies guardrails, and generates ScoreOutput. Needs unit testing."
       - working: true
         agent: "testing"
-        comment: "All 15 unit tests passing with 100% coverage (103 statements, 0 missed). Scoring engine successfully orchestrates pillar weighting, risk penalty calculation, and guardrails application. Complete ScoreOutput generation working correctly."
+        comment: "ScoreDatabase class with full CRUD operations tested. All 29 unit tests passing with 77% coverage. UPSERT functionality, parameterized queries, and query methods (by ticker, by band, with date filters) all working correctly. Database connection management and error handling validated."
 
-  - task: "Scoring Unit Tests"
+  - task: "FastAPI Application Setup"
     implemented: true
     working: true
-    file: "/app/backend/tests/unit/test_scoring.py"
+    file: "/app/backend/greyoak_score/api/main.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Need to create comprehensive unit tests for the scoring module before integration testing."
       - working: true
         agent: "testing"
-        comment: "All 15 unit tests implemented and passing with 100% coverage. Tests cover input validation, data quality metrics, complete scoring flow, weight application, and utility functions. Comprehensive test coverage achieved."
+        comment: "FastAPI app with middleware, exception handling, and lifespan management working correctly. CORS support, global exception handler, and proper startup/shutdown lifecycle implemented. Application serves OpenAPI docs at /docs and /redoc."
 
-  - task: "RELIANCE Golden Test"
+  - task: "API Routes Implementation"
     implemented: true
     working: true
-    file: "/app/backend/tests/unit/test_golden_values.py"
+    file: "/app/backend/greyoak_score/api/routes.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Critical integration test to validate complete pipeline with RELIANCE worked example. Expected score ~62.6, Band=Hold, RP=0."
       - working: true
         agent: "testing"
-        comment: "Golden values regression tests implemented and passing. All 6 tests pass including RELIANCE data validation. Tests cover fundamentals, technicals, relative strength, deterministic reproducibility, numerical stability, and cross-pillar consistency."
+        comment: "All 4 REST endpoints working correctly: POST /api/v1/calculate (score calculation), GET /api/v1/scores/{ticker} (score history), GET /api/v1/scores/band/{band} (stocks by band), GET /api/v1/health (health check). Input validation, error handling, and proper HTTP status codes confirmed."
 
-  - task: "Complete Pipeline Integration"
+  - task: "Pydantic Schemas"
     implemented: true
     working: true
-    file: "/app/backend/tests/unit/test_scoring.py"
+    file: "/app/backend/greyoak_score/api/schemas.py"
     stuck_count: 0
-    priority: "high" 
+    priority: "high"
     needs_retesting: false
     status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "End-to-end integration test with all 15 sample stocks to ensure complete pipeline works correctly."
       - working: true
         agent: "testing"
-        comment: "Complete pipeline integration validated through comprehensive unit tests. All 56 tests passing across risk penalty (20 tests), guardrails (21 tests), and scoring (15 tests) modules. Full integration from pillar scores → weighted score → RP → guardrails → final score/band working correctly."
+        comment: "Pydantic models for request/response validation working correctly. ScoreRequest, ScoreResponse, HealthResponse, and ErrorResponse schemas provide comprehensive input validation and automatic OpenAPI schema generation. Custom validators for ticker and date formats functioning properly."
+
+  - task: "Score Calculation Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/api/routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "POST /api/v1/calculate endpoint working correctly with mocked data. Score calculation pipeline (pillar scores → weighted score → risk penalty → guardrails → final score/band) functioning. Database save integration working. Production API tested: Score: 72.86, Band: Buy for TCS.NS."
+
+  - task: "Score Retrieval Endpoints"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/api/routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/v1/scores/{ticker} and GET /api/v1/scores/band/{band} endpoints working correctly. Query filtering by date range, mode, and limit parameters functioning. Production API tested: Found 1 historical score for RELIANCE.NS and 1 Buy stock with avg score 74.1."
+
+  - task: "Health Check Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/api/routes.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "GET /api/v1/health endpoint working correctly with database connectivity check. Production API shows: Overall: healthy, DB: healthy, API: healthy. Database stats showing 2 total scores, 2 unique tickers, proper band distribution."
+
+  - task: "End-to-End Integration"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/api/"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Complete end-to-end flow tested: POST calculate → database save → GET retrieve. Score calculation with mocked data (Score: 69.88, Band: Hold), database UPSERT functionality, and data retrieval all working correctly. Production API fully operational with real database persistence."
 
 metadata:
   created_by: "main_agent"
