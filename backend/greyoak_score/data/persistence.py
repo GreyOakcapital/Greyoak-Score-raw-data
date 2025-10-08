@@ -136,33 +136,73 @@ class ScoreDatabase:
             logger.info("Connection pool closed")
     
     @contextmanager
-    def get_connection(self):
+    def get_connection(self, max_retries: int = 3, retry_delay: float = 0.5):
         """
-        Context manager for database connections with proper cleanup.
+        Context manager for pooled database connections with retry logic.
+        
+        Args:
+            max_retries: Maximum retry attempts for connection acquisition
+            retry_delay: Initial delay between retries (exponential backoff)
         
         Yields:
-            psycopg2.connection: Database connection with autocommit disabled
+            psycopg2.connection: Database connection from pool with autocommit disabled
             
         Raises:
-            psycopg2.Error: If connection fails
+            psycopg2.Error: If connection fails after all retries
         """
         conn = None
-        try:
-            conn = psycopg2.connect(self.database_url)
-            yield conn
-        except psycopg2.Error as e:
-            logger.error(f"Database connection error: {e}")
-            if conn:
-                conn.rollback()
-            raise
-        except Exception as e:
-            logger.error(f"Unexpected database error: {e}")
-            if conn:
-                conn.rollback()
-            raise
-        finally:
-            if conn:
-                conn.close()
+        
+        for attempt in range(max_retries + 1):
+            try:
+                if not self._connection_pool:
+                    raise psycopg2.Error("Connection pool not initialized")
+                
+                conn = self._connection_pool.getconn()
+                if conn.closed:
+                    # Connection is closed, return it and get a fresh one
+                    self._connection_pool.putconn(conn, close=True)
+                    conn = self._connection_pool.getconn()
+                
+                yield conn
+                # If we reach here, operation was successful
+                return
+                
+            except psycopg2.Error as e:
+                if conn:
+                    # Return connection to pool (will be closed if corrupted)
+                    try:
+                        conn.rollback()
+                    except:
+                        pass  # Connection might be unusable
+                    
+                    self._connection_pool.putconn(conn, close=True)
+                    conn = None
+                
+                if attempt == max_retries:
+                    logger.error(f"Database connection failed after {max_retries + 1} attempts: {e}")
+                    raise
+                
+                wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                logger.warning(f"Database connection attempt {attempt + 1}/{max_retries + 1} failed: {e}")
+                logger.warning(f"Retrying in {wait_time:.1f} seconds...")
+                time.sleep(wait_time)
+                
+            except Exception as e:
+                if conn:
+                    try:
+                        conn.rollback()
+                    except:
+                        pass
+                    self._connection_pool.putconn(conn, close=True)
+                    conn = None
+                
+                logger.error(f"Unexpected database error: {e}")
+                raise
+            
+            finally:
+                if conn:
+                    # Return connection to pool for reuse
+                    self._connection_pool.putconn(conn)
     
     def test_connection(self) -> bool:
         """
