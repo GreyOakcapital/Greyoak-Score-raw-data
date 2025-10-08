@@ -280,10 +280,18 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus: []
-  stuck_tasks: []
+  current_focus: 
+    - "CP7 CORS Security Implementation"
+    - "CP7 Rate Limiting Implementation" 
+    - "CP7 Health Endpoints"
+    - "CP7 Production Configuration"
+  stuck_tasks:
+    - "CP7 CORS Security Implementation"
+    - "CP7 Rate Limiting Implementation"
+    - "CP7 Health Endpoints"
+    - "CP7 Production Configuration"
   test_all: false
-  test_priority: "sequential"
+  test_priority: "stuck_first"
 
 agent_communication:
   - agent: "main"
