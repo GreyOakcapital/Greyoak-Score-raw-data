@@ -96,32 +96,34 @@ def calculate_greyoak_score(
     
     logger.debug(f"Calculating pillars for {ticker}")
     
-    # Determine if it's a banking stock for F pillar
-    is_banking = sector_group in ["banks", "psu_banks"]
+    # Initialize pillar calculators
+    f_pillar = FundamentalsPillar(config)
+    t_pillar = TechnicalsPillar(config)
+    r_pillar = RelativeStrengthPillar(config)
+    o_pillar = OwnershipPillar(config)
+    q_pillar = QualityPillar(config)
+    s_pillar = SectorMomentumPillar(config)
     
-    pillar_f = calculate_fundamentals_pillar(
-        fundamentals_data, is_banking, config
-    )
+    # Calculate pillar scores (get scores for all stocks, then extract our ticker)
+    f_scores = f_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
+    t_scores = t_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
+    r_scores = r_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
+    o_scores = o_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
+    q_scores = q_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
+    s_scores = s_pillar.calculate(all_prices_df, all_fundamentals_df, all_ownership_df, sector_map_df, mode)
     
-    pillar_t = calculate_technicals_pillar(
-        prices_data, config
-    )
+    # Extract scores for our ticker
+    pillar_f = f_scores.loc[ticker, f_pillar.pillar_name] if ticker in f_scores.index else 50.0
+    pillar_t = t_scores.loc[ticker, t_pillar.pillar_name] if ticker in t_scores.index else 50.0
+    pillar_r = r_scores.loc[ticker, r_pillar.pillar_name] if ticker in r_scores.index else 50.0
+    pillar_o = o_scores.loc[ticker, o_pillar.pillar_name] if ticker in o_scores.index else 50.0
+    pillar_q = q_scores.loc[ticker, q_pillar.pillar_name] if ticker in q_scores.index else 50.0
+    pillar_s = s_scores.loc[ticker, s_pillar.pillar_name] if ticker in s_scores.index else 50.0
     
-    pillar_r = calculate_relative_strength_pillar(
-        ticker, prices_data, sector_data, market_data, sector_group, config
-    )
-    
-    pillar_o = calculate_ownership_pillar(
-        ownership_data, config
-    )
-    
-    pillar_q = calculate_quality_pillar(
-        fundamentals_data, config
-    )
-    
-    pillar_s, s_z = calculate_sector_momentum_pillar(
-        sector_data, config
-    )
+    # Get sector momentum z-score for guardrails
+    # For now, use a simple proxy since we need the actual sector momentum calculation
+    # TODO: Extract S_z from sector momentum pillar properly
+    s_z = 0.0  # Placeholder - will be calculated in sector momentum pillar
     
     pillars = PillarScores(
         F=round(pillar_f, 2),
