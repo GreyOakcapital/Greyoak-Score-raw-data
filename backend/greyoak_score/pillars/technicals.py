@@ -221,7 +221,9 @@ class TechnicalsPillar(BasePillar):
             return 50.0  # Not enough history
         
         # Get last 20 days excluding current (for fair comparison)
-        recent_history = ticker_history.sort_values('trading_date').iloc[:-1].tail(20)
+        # Use 'date' column if 'trading_date' not available
+        date_col = 'trading_date' if 'trading_date' in ticker_history.columns else 'date'
+        recent_history = ticker_history.sort_values(date_col).iloc[:-1].tail(20)
         
         if len(recent_history) == 0:
             return 50.0
