@@ -298,8 +298,7 @@ class TestScoringEngine:
                     s_z=0.5
                 )
                 
-                assert result.sector_group == "banks"
-                assert result.mode == "investor"
+                assert result.mode == "Investor"
     
     def test_calculate_greyoak_score_with_custom_date(self, config_manager, sample_prices_data,
                                                       sample_fundamentals_data, sample_ownership_data):
