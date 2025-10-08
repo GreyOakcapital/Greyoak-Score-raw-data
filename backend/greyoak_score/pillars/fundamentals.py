@@ -110,7 +110,7 @@ class FundamentalsPillar(BasePillar):
         logger.info("  📈 Processing non-financial stocks...")
         
         # Get configuration
-        weights = self.config.get_non_financial_fundamentals_weights()
+        weights = self.config.get_fundamentals_weights(is_banking=False)
         
         # Define metrics and their direction (True = higher better, False = lower better)
         metrics_config = {
