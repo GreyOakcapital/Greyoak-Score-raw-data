@@ -145,16 +145,19 @@ backend:
         comment: "All 15 unit tests passing with 100% coverage (103 statements, 0 missed). Scoring engine successfully orchestrates pillar weighting, risk penalty calculation, and guardrails application. Complete ScoreOutput generation working correctly."
 
   - task: "Scoring Unit Tests"
-    implemented: false
-    working: "NA"
+    implemented: true
+    working: true
     file: "/app/backend/tests/unit/test_scoring.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Need to create comprehensive unit tests for the scoring module before integration testing."
+      - working: true
+        agent: "testing"
+        comment: "All 15 unit tests implemented and passing with 100% coverage. Tests cover input validation, data quality metrics, complete scoring flow, weight application, and utility functions. Comprehensive test coverage achieved."
 
   - task: "RELIANCE Golden Test"
     implemented: false
