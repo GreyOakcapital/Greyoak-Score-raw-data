@@ -101,3 +101,97 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Implement CP5 of GreyOak Score Engine - Risk Penalty Calculator, Guardrails Engine, and Final Scoring & Banding Engine with comprehensive testing including RELIANCE golden test"
+
+backend:
+  - task: "Risk Penalty Calculator"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/core/risk_penalty.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Successfully implemented with liquidity, pledge, volatility, event, and governance penalties. Fixed config method usage and typo. All 20 unit tests passing with 89% coverage."
+
+  - task: "Guardrails Engine"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/core/guardrails.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Successfully implemented with hard-coded sequential order: LowDataHold→Illiquidity→PledgeCap→HighRiskCap→SectorBear→LowCoverage. Fixed illiquidity logic and string formatting. All 21 unit tests passing with 97% coverage."
+
+  - task: "Final Scoring Engine"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/greyoak_score/core/scoring.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Just implemented the main scoring orchestrator that combines all pillars, applies weights, calculates RP, applies guardrails, and generates ScoreOutput. Needs unit testing."
+
+  - task: "Scoring Unit Tests"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/tests/unit/test_scoring.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Need to create comprehensive unit tests for the scoring module before integration testing."
+
+  - task: "RELIANCE Golden Test"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/tests/integration/test_reliance_golden.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Critical integration test to validate complete pipeline with RELIANCE worked example. Expected score ~62.6, Band=Hold, RP=0."
+
+  - task: "Complete Pipeline Integration"
+    implemented: false
+    working: "NA"
+    file: "/app/backend/tests/integration/test_full_scoring_pipeline.py"
+    stuck_count: 0
+    priority: "high" 
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "End-to-end integration test with all 15 sample stocks to ensure complete pipeline works correctly."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Scoring Unit Tests"
+    - "RELIANCE Golden Test"
+    - "Complete Pipeline Integration"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "sequential"
+
+agent_communication:
+  - agent: "main"
+    message: "CP5 core modules completed: Risk Penalty (89% coverage), Guardrails (97% coverage), and Final Scoring Engine implemented. Ready to create unit tests for scoring module and then proceed to integration testing including the critical RELIANCE golden test."
