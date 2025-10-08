@@ -377,6 +377,7 @@ class TestUtilityFunctions:
         """Test score explanation generation."""
         score_output = ScoreOutput(
             ticker="TESTSTOCK",
+            date=datetime.now(timezone.utc).date(),
             score=72.5,
             band="Buy",
             pillars=PillarScores(F=75, T=70, R=68, O=80, Q=85, S=72),
@@ -384,8 +385,7 @@ class TestUtilityFunctions:
             guardrail_flags=["LowDataHold", "PledgeCap"],
             confidence=0.65,
             s_z=-0.5,
-            sector_group="it",
-            mode="trader",
+            mode="Trader",
             as_of=datetime.now(timezone.utc),
             config_hash="abc123"
         )
