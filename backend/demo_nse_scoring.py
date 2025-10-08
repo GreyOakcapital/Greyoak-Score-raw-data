@@ -27,7 +27,6 @@ from pathlib import Path
 # Add the backend directory to Python path
 sys.path.insert(0, '/app/backend')
 
-from greyoak_score.core.scoring import calculate_greyoak_score
 from greyoak_score.core.config_manager import ConfigManager
 from greyoak_score.data.models import ScoreOutput
 
