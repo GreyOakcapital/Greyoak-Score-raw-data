@@ -28,10 +28,10 @@ class TestWinsorization:
         
         result = winsorize_by_sector(df, "sector_group", ["metric"])
         
-        # 1st percentile ≈ 1, 99th percentile ≈ 98
-        # Values 0 and 99 should be capped
-        assert result["metric"].min() >= 1.0
-        assert result["metric"].max() <= 98.0
+        # 1st percentile ≈ 0.99, 99th percentile ≈ 98.01
+        # Values 0 and 99 should be capped to these percentiles
+        assert result["metric"].min() >= 0.9  # Allow some tolerance
+        assert result["metric"].max() <= 98.1
         # Most values should be unchanged
         assert (result["metric"] == df["metric"]).sum() > 90
 
