@@ -310,7 +310,7 @@ class TestFullDataPipeline:
         # Overall pipeline success
         assert imputed_frac >= 0.0
         assert confidence > 0.0
-        logger.info(
+        print(
             f"✅ Full pipeline complete: "
             f"imputed_frac={imputed_frac:.1%}, confidence={confidence:.3f}"
         )
