@@ -225,11 +225,14 @@ async def calculate_score_endpoint(request_obj: Request, request: ScoreRequest):
     responses={
         400: {"model": ErrorResponse, "description": "Invalid parameters"},
         404: {"model": ErrorResponse, "description": "No scores found"},
+        429: {"model": ErrorResponse, "description": "Rate limit exceeded"},
         500: {"model": ErrorResponse, "description": "Database error"}
     },
-    summary="Get Score History",
-    description="""
+    summary="Get Score History (Rate Limited)",
+    description=f"""
     Retrieve score history for a specific ticker with optional filters.
+    
+    **Rate Limiting:** {rate_limit_per_minute} requests per minute per IP address.
     
     **Query Parameters:**
     - `start_date`: Filter scores from this date (inclusive, YYYY-MM-DD)
