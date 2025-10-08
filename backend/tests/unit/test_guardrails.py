@@ -428,9 +428,9 @@ class TestGuardrailUtilities:
         explanation = explain_guardrail("UnknownGuardrail")
         assert "Unknown guardrail" in explanation
         
-        # Test with missing kwargs (should not crash)
+        # Test with missing kwargs (should not crash, provides defaults)
         explanation = explain_guardrail("LowDataHold")  # Missing confidence
-        assert "insufficient data" in explanation
+        assert "0.0%" in explanation  # Should use default value
     
     def test_get_band_implications(self):
         """Test band implications."""
