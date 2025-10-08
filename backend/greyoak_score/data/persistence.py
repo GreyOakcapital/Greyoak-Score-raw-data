@@ -671,12 +671,23 @@ _db_instance = None
 
 def get_database() -> ScoreDatabase:
     """
-    Get singleton database instance.
+    Get singleton database instance with connection pooling.
     
     Returns:
-        ScoreDatabase: Shared database instance
+        ScoreDatabase: Shared database instance with initialized pool
     """
     global _db_instance
     if _db_instance is None:
         _db_instance = ScoreDatabase()
     return _db_instance
+
+def close_database() -> None:
+    """
+    Close the singleton database instance and its connection pool.
+    Should be called during application shutdown.
+    """
+    global _db_instance
+    if _db_instance is not None:
+        _db_instance.close_pool()
+        _db_instance = None
+        logger.info("Database singleton closed")
