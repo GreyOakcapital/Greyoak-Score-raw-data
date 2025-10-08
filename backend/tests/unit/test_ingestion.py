@@ -246,10 +246,13 @@ TCS,IT_SERVICES,it,NSE
 
     def test_load_all_data_missing_file(self, tmp_path):
         """Test error handling when one file is missing."""
-        # Create only some files
-        (tmp_path / "prices.csv").write_text("date,ticker,open,high,low,close,volume\n")
-        # Don't create fundamentals.csv
+        # Create only prices file with some data to avoid empty concat issue
+        (tmp_path / "prices.csv").write_text("""date,ticker,open,high,low,close,volume
+2024-01-01,TEST,100,105,95,100,1000
+""")
+        # Don't create fundamentals.csv - this should cause the error
         
+        # We expect the error to occur when trying to load fundamentals, not prices
         with pytest.raises(FileNotFoundError):
             load_all_data(tmp_path)
 
