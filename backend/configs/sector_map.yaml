@@ -1,0 +1,130 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GreyOak Score Engine - Sector Mapping Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Section 4.2: Sector Group Templates
+# Maps tickers to sector groups and defines sector-specific parameters
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+version: "1.0.0"
+
+# Sector group templates (characteristics per sector)
+sector_groups:
+  banks:
+    name: "Banks/NBFCs"
+    horizon_bias: "long"
+    rp_cap: 20
+    liquidity_floor_multiplier: 1.0
+    use_banking_f_pillar: true
+  
+  psu_banks:
+    name: "PSU Banks"
+    horizon_bias: "long"
+    rp_cap: 18
+    liquidity_floor_multiplier: 1.0
+    use_banking_f_pillar: true
+  
+  metals:
+    name: "Metals/Commodities"
+    horizon_bias: "short"
+    rp_cap: 18
+    liquidity_floor_multiplier: 1.2
+    use_banking_f_pillar: false
+  
+  fmcg:
+    name: "FMCG"
+    horizon_bias: "long"
+    rp_cap: 12
+    liquidity_floor_multiplier: 0.8
+    use_banking_f_pillar: false
+  
+  it:
+    name: "IT Services"
+    horizon_bias: "long"
+    rp_cap: 12
+    liquidity_floor_multiplier: 1.0
+    use_banking_f_pillar: false
+  
+  auto_caps:
+    name: "Autos/Chemicals/Capital Goods"
+    horizon_bias: "mid"
+    rp_cap: 16
+    liquidity_floor_multiplier: 1.0
+    use_banking_f_pillar: false
+  
+  diversified:
+    name: "Diversified/Conglomerates"
+    horizon_bias: "mid"
+    rp_cap: 20
+    liquidity_floor_multiplier: 1.0
+    use_banking_f_pillar: false
+
+# Ticker to sector mapping
+# This should match sector_map.csv data
+# In production, this is loaded from CSV and stored in database
+ticker_sectors:
+  # Banks
+  HDFCBANK.NS:
+    sector_id: "PRIVATE_BANKS"
+    sector_group: "banks"
+  
+  ICICIBANK.NS:
+    sector_id: "PRIVATE_BANKS"
+    sector_group: "banks"
+  
+  # PSU Banks
+  SBIN.NS:
+    sector_id: "PSU_BANKS"
+    sector_group: "psu_banks"
+  
+  # FMCG
+  HINDUNILVR.NS:
+    sector_id: "FMCG"
+    sector_group: "fmcg"
+  
+  ITC.NS:
+    sector_id: "FMCG"
+    sector_group: "fmcg"
+  
+  NESTLEIND.NS:
+    sector_id: "FMCG"
+    sector_group: "fmcg"
+  
+  # IT
+  TCS.NS:
+    sector_id: "IT_SERVICES"
+    sector_group: "it"
+  
+  INFY.NS:
+    sector_id: "IT_SERVICES"
+    sector_group: "it"
+  
+  # Metals
+  TATASTEEL.NS:
+    sector_id: "STEEL"
+    sector_group: "metals"
+  
+  COALINDIA.NS:
+    sector_id: "COAL"
+    sector_group: "metals"
+  
+  HINDALCO.NS:
+    sector_id: "ALUMINIUM"
+    sector_group: "metals"
+  
+  ONGC.NS:
+    sector_id: "OIL_GAS"
+    sector_group: "metals"
+  
+  # Autos/Chemicals
+  MARUTI.NS:
+    sector_id: "AUTO"
+    sector_group: "auto_caps"
+  
+  ASIANPAINT.NS:
+    sector_id: "PAINTS"
+    sector_group: "auto_caps"
+  
+  # Diversified
+  RELIANCE.NS:
+    sector_id: "DIVERSIFIED"
+    sector_group: "diversified"

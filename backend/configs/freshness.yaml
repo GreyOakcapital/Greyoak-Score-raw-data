@@ -1,0 +1,28 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GreyOak Score Engine - Data Freshness Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Section 3.2: Data Freshness and Service Levels
+# Section 7.2: Confidence Calculation
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+version: "1.0.0"
+
+# Data freshness SLOs (in days)
+# Used in confidence calculation: freshness = exp(-days_since_update / slo_days)
+freshness_slo:
+  prices: 1          # Daily data - should be updated daily
+  fundamentals: 120  # Quarterly data - up to 120 days acceptable
+  ownership: 120     # Quarterly data - up to 120 days acceptable
+  events: 7          # Event data - weekly updates
+
+# Confidence calculation weights
+# Formula: confidence = 0.55×coverage + 0.35×freshness + 0.10×(1-source_penalty)
+confidence_weights:
+  coverage: 0.55       # Fraction of required fields present
+  freshness: 0.35      # Exponential decay of staleness
+  source_quality: 0.10 # Penalty for non-primary sources
+
+# Source quality penalties
+source_penalties:
+  primary: 0.0    # Official exchange feeds, licensed APIs
+  secondary: 0.15 # Fallback sources (Yahoo Finance, etc.)

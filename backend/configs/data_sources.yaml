@@ -1,0 +1,59 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GreyOak Score Engine - Data Sources Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Section 3.9: Data Sources and Vendors
+# (Future use - for production data feeds)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+version: "1.0.0"
+
+# Data vendor precedence (primary > secondary)
+vendors:
+  prices:
+    primary:
+      name: "NSE/BSE Official Feeds"
+      type: "exchange_feed"
+      freshness_slo: 1  # days
+    
+    secondary:
+      name: "Yahoo Finance"
+      type: "api"
+      freshness_slo: 1
+  
+  fundamentals:
+    primary:
+      name: "Trendlyne API"
+      type: "enterprise_api"
+      freshness_slo: 120
+    
+    secondary:
+      name: "NSE Corporate Filings"
+      type: "public"
+      freshness_slo: 120
+  
+  ownership:
+    primary:
+      name: "Trendlyne API"
+      type: "enterprise_api"
+      freshness_slo: 120
+    
+    secondary:
+      name: "BSE/NSE Disclosures"
+      type: "public"
+      freshness_slo: 120
+  
+  events:
+    primary:
+      name: "Trendlyne API"
+      type: "enterprise_api"
+      freshness_slo: 7
+    
+    secondary:
+      name: "NSE Announcements"
+      type: "public"
+      freshness_slo: 7
+
+# Fallback behavior
+fallback:
+  use_secondary_if_primary_stale: true
+  max_staleness_days: 7  # Don't use data older than this even from fallback

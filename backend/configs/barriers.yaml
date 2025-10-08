@@ -1,0 +1,40 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# GreyOak Score Engine - Price Barriers Configuration
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Section 8: Barrier Implementation
+# (For future Predictor module - NOT used in Score engine)
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+version: "1.0.0"
+
+# NOTE: Price barriers belong to the Predictor module (triple-barrier labeling)
+# and Stress Engine (stop-loss/target setting). They do NOT affect the Score engine.
+# This file is included for completeness but not used in Phase 1.
+
+# Default barrier percentages by sector and mode
+barriers:
+  trader:
+    default:
+      upper: 0.10  # +10%
+      lower: -0.05 # -5%
+    
+    metals:
+      upper: 0.18  # +18%
+      lower: -0.10 # -10%
+    
+    fmcg:
+      upper: 0.08  # +8%
+      lower: -0.04 # -4%
+  
+  investor:
+    default:
+      upper: 0.22  # +22%
+      lower: -0.12 # -12%
+    
+    metals:
+      upper: 0.25  # +25%
+      lower: -0.12 # -12%
+    
+    fmcg:
+      upper: 0.10  # +10%
+      lower: -0.05 # -5%
