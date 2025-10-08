@@ -39,14 +39,21 @@ class TestPillarsFTRIntegration:
     def test_fundamentals_pillar_with_real_data(self, config_manager, clean_data):
         """Test Fundamentals pillar with real data."""
         clean_prices, clean_fund, clean_own, _, _ = clean_data
-        sector_map_df = clean_data[0].groupby('ticker')['sector_group'].first().reset_index()
+        
+        # Extract unique sector mapping from clean_prices (which already has sector_group)
+        sector_map_df = clean_prices.groupby('ticker')['sector_group'].first().reset_index()
+        
+        # Remove sector_group from fundamentals to avoid merge conflicts
+        clean_fund_no_sector = clean_fund.drop(columns=['sector_group'], errors='ignore')
+        clean_own_no_sector = clean_own.drop(columns=['sector_group'], errors='ignore')
+        clean_prices_no_sector = clean_prices.drop(columns=['sector_group'], errors='ignore')
         
         # Create pillar
         f_pillar = FundamentalsPillar(config_manager)
         
         # Calculate scores
         result = f_pillar.calculate(
-            clean_prices, clean_fund, clean_own, sector_map_df
+            clean_prices_no_sector, clean_fund_no_sector, clean_own_no_sector, sector_map_df
         )
         
         # Verify results
