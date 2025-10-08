@@ -128,7 +128,7 @@ async def calculate_score_endpoint(request: ScoreRequest):
             'quarter_end': '2024-09-30'
         })
         
-        mock_ownership_data = Series({
+        mock_ownership_data = pd.Series({
             'promoter_holding_pct': 0.68,
             'promoter_pledge_frac': 0.05,
             'fii_holding_pct': 0.15
