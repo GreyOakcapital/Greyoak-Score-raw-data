@@ -568,41 +568,158 @@ cat backup.sql | docker-compose exec -T db psql -U greyoak greyoak_scores
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting & Operations
 
-### Services not starting?
+### Common Issues & Solutions
+
+#### Services Not Starting
 
 ```bash
 # Check service status
 docker-compose ps
 
-# View logs
-make logs
+# View detailed logs
+docker-compose logs api
+docker-compose logs db
 
-# Restart services
-make stop
-make run
+# Restart specific service
+docker-compose restart api
+
+# Complete restart
+docker-compose down && docker-compose up -d
 ```
 
-### Tests failing?
+#### Database Connection Issues
 
 ```bash
-# Check coverage report
-pytest --cov-report=html
-open htmlcov/index.html
+# Check database connectivity
+docker-compose exec api python -c "
+from greyoak_score.data.persistence import get_database
+db = get_database()
+print('DB Health:', db.test_connection())
+"
 
-# Run specific test
-pytest tests/unit/test_config_manager.py::TestConfigManagerLoading::test_load_all_configs -v
+# Check connection pool status
+curl -s http://localhost:8000/api/v1/health | jq '.components.database'
+
+# Reset database (WARNING: Destroys data)
+docker-compose down -v && docker-compose up -d
 ```
 
-### Configuration errors?
+#### API Performance Issues
 
 ```bash
-# Validate configs
+# Monitor resource usage
+docker stats greyoak-api greyoak-db
+
+# Check API response times
+curl -w "@curl-format.txt" -s -o /dev/null http://localhost:8000/api/v1/health
+
+# Analyze slow queries
+docker-compose exec db psql -U greyoak -d greyoak_scores -c "
+SELECT query, calls, total_time, mean_time 
+FROM pg_stat_statements 
+ORDER BY total_time DESC LIMIT 10;"
+```
+
+#### Rate Limiting Issues
+
+```bash
+# Check rate limit headers
+curl -I http://localhost:8000/api/v1/health | grep -i ratelimit
+
+# Test rate limiting
+for i in {1..65}; do
+  curl -s -o /dev/null -w "%{http_code} " "http://localhost:8000/api/v1/health"
+done
+```
+
+#### Configuration Validation
+
+```bash
+# Validate all configurations
 make validate-config
 
-# Check config hash
-python -c "from greyoak_score.core.config_manager import ConfigManager; from pathlib import Path; print(ConfigManager(Path('configs')).config_hash)"
+# Check environment variables
+docker-compose exec api env | grep -E "(CORS|RATE|DB_)"
+
+# Verify configuration hash
+docker-compose exec api python -c "
+from greyoak_score.core.config_manager import ConfigManager
+from pathlib import Path
+cm = ConfigManager(Path('configs'))
+print(f'Config Hash: {cm.config_hash}')
+"
+```
+
+### Health Monitoring
+
+#### Application Health Checks
+
+```bash
+# Infrastructure health (fast, no DB check)
+curl -s http://localhost:8000/health | jq .
+
+# Application health (includes DB connectivity)
+curl -s http://localhost:8000/api/v1/health | jq .
+
+# Database statistics
+curl -s http://localhost:8000/api/v1/health | jq '.stats'
+```
+
+#### Log Analysis
+
+```bash
+# View recent API logs
+docker-compose logs --tail=100 api
+
+# Filter for errors
+docker-compose logs api | grep -i error
+
+# Monitor real-time logs
+docker-compose logs -f api
+
+# Structured log analysis
+docker-compose logs api | grep -E "ERROR|WARNING" | jq .
+```
+
+### Performance Monitoring
+
+#### Resource Monitoring
+
+```bash
+# Container resource usage
+docker stats --no-stream
+
+# Database performance
+docker-compose exec db psql -U greyoak -d greyoak_scores -c "
+SELECT 
+    datname,
+    numbackends,
+    xact_commit,
+    xact_rollback,
+    blks_read,
+    blks_hit,
+    tup_returned,
+    tup_fetched
+FROM pg_stat_database 
+WHERE datname = 'greyoak_scores';"
+```
+
+#### API Performance Testing
+
+```bash
+# Basic performance test
+pytest tests/performance/ -v -s -m performance
+
+# Load testing with Apache Bench
+ab -n 100 -c 10 http://localhost:8000/api/v1/health
+
+# Stress testing
+for i in {1..100}; do
+  curl -s -o /dev/null "http://localhost:8000/api/v1/health" &
+done
+wait
 ```
 
 ---
