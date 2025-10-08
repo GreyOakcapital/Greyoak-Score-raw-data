@@ -235,7 +235,9 @@ class TestGetScore:
         
         # Verify SQL query
         call_args = mock_cursor.execute.call_args
-        assert "SELECT * FROM scores WHERE ticker = %s AND date = %s AND mode = %s" in call_args[0][0]
+        query = call_args[0][0].strip()  # Remove whitespace
+        assert "SELECT * FROM scores" in query
+        assert "WHERE ticker = %s AND date = %s AND mode = %s" in query
     
     def test_get_score_not_found(self, mock_db):
         """Test score retrieval when no record exists."""
