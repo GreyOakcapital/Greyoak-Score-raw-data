@@ -278,38 +278,28 @@ class TestScoringEngine:
         mock_rp.assert_called_once()
         mock_guardrails.assert_called_once()
     
-    def test_calculate_greyoak_score_banking_stock(
-        self, config_manager, sample_prices_data, sample_fundamentals_data,
-        sample_ownership_data, sample_sector_data, sample_market_data
-    ):
-        """Test scoring with banking stock (different F pillar logic)."""
-        with patch('greyoak_score.core.scoring.calculate_fundamentals_pillar') as mock_f:
-            with patch('greyoak_score.core.scoring.calculate_technicals_pillar', return_value=70.0):
-                with patch('greyoak_score.core.scoring.calculate_relative_strength_pillar', return_value=65.0):
-                    with patch('greyoak_score.core.scoring.calculate_ownership_pillar', return_value=75.0):
-                        with patch('greyoak_score.core.scoring.calculate_quality_pillar', return_value=68.0):
-                            with patch('greyoak_score.core.scoring.calculate_sector_momentum_pillar', return_value=(72.0, 0.5)):
-                                with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(3.0, {})):
-                                    with patch('greyoak_score.core.scoring.apply_guardrails', return_value=(70.0, "Buy", [])):
-                                        
-                                        mock_f.return_value = 80.0
-                                        
-                                        result = calculate_greyoak_score(
-                                            ticker="BANKSTOCK",
-                                            prices_data=sample_prices_data,
-                                            fundamentals_data=sample_fundamentals_data,
-                                            ownership_data=sample_ownership_data,
-                                            sector_data=sample_sector_data,
-                                            market_data=sample_market_data,
-                                            sector_group="banks",  # Banking sector
-                                            mode="investor",
-                                            config=config_manager
-                                        )
-                                        
-                                        # Verify banking flag was passed to fundamentals pillar
-                                        mock_f.assert_called_once()
-                                        args, kwargs = mock_f.call_args
-                                        assert args[1] == True  # is_banking should be True
+    def test_calculate_greyoak_score_banking_stock(self, config_manager, sample_prices_data, 
+                                                   sample_fundamentals_data, sample_ownership_data):
+        """Test scoring with banking stock."""
+        with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(3.0, {})):
+            with patch('greyoak_score.core.scoring.apply_guardrails', return_value=(70.0, "Buy", [])):
+                
+                pillar_scores = {'F': 80.0, 'T': 70.0, 'R': 65.0, 'O': 75.0, 'Q': 68.0, 'S': 72.0}
+                
+                result = calculate_greyoak_score(
+                    ticker="BANKSTOCK",
+                    pillar_scores=pillar_scores,
+                    prices_data=sample_prices_data,
+                    fundamentals_data=sample_fundamentals_data,
+                    ownership_data=sample_ownership_data,
+                    sector_group="banks",
+                    mode="investor",
+                    config=config_manager,
+                    s_z=0.5
+                )
+                
+                assert result.sector_group == "banks"
+                assert result.mode == "investor"
     
     def test_calculate_greyoak_score_with_custom_date(
         self, config_manager, sample_prices_data, sample_fundamentals_data,
