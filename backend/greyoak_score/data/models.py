@@ -44,21 +44,21 @@ class DailyPriceData(BaseModel):
     volume: float = Field(..., ge=0, description="Trading volume")
     
     # Moving averages
-    dma_20: Optional[float] = Field(None, description="20-day moving average")
-    dma_50: Optional[float] = Field(None, description="50-day moving average")
-    dma_200: Optional[float] = Field(None, description="200-day moving average")
+    dma20: Optional[float] = Field(None, description="20-day moving average")
+    dma50: Optional[float] = Field(None, description="50-day moving average")
+    dma200: Optional[float] = Field(None, description="200-day moving average")
     
     # Technical indicators
-    rsi_14: Optional[float] = Field(None, ge=0, le=100, description="14-day RSI")
-    atr_14: Optional[float] = Field(None, ge=0, description="14-day ATR (absolute)")
+    rsi14: Optional[float] = Field(None, ge=0, le=100, description="14-day RSI")
+    atr14: Optional[float] = Field(None, ge=0, description="14-day ATR (absolute)")
     macd_line: Optional[float] = Field(None, description="MACD line")
     macd_signal: Optional[float] = Field(None, description="MACD signal line")
     
     # Extremes
-    hi_20d: Optional[float] = Field(None, description="20-day high")
-    lo_20d: Optional[float] = Field(None, description="20-day low")
-    hi_52w: Optional[float] = Field(None, description="52-week high")
-    lo_52w: Optional[float] = Field(None, description="52-week low")
+    hi20: Optional[float] = Field(None, description="20-day high")
+    lo20: Optional[float] = Field(None, description="20-day low")
+    hi52w: Optional[float] = Field(None, description="52-week high")
+    lo52w: Optional[float] = Field(None, description="52-week low")
     
     # Returns (as decimals, e.g., 0.05 = 5%)
     ret_21d: Optional[float] = Field(None, description="21-day return")
@@ -66,8 +66,8 @@ class DailyPriceData(BaseModel):
     ret_126d: Optional[float] = Field(None, description="126-day return")
     
     # Volatility (daily, not annualized)
-    sigma_20: Optional[float] = Field(None, ge=0, description="20-day volatility (daily)")
-    sigma_60: Optional[float] = Field(None, ge=0, description="60-day volatility (daily)")
+    sigma20: Optional[float] = Field(None, ge=0, description="20-day volatility (daily)")
+    sigma60: Optional[float] = Field(None, ge=0, description="60-day volatility (daily)")
     
     @field_validator("high")
     @classmethod
