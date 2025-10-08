@@ -387,7 +387,7 @@ def run_nse_scoring_demo():
     config_path = Path('/app/backend/configs')
     config_manager = ConfigManager(config_path)
     print(f"   • Configuration Hash: {config_manager.config_hash[:16]}...")
-    investor_weights = config_manager.get_pillar_weights('Investor')
+    investor_weights = config_manager.get_pillar_weights('IT', 'Investor')  # Sample sector
     print(f"   • Pillar Weights (Investor): F={investor_weights['F']:.2f}, T={investor_weights['T']:.2f}, R={investor_weights['R']:.2f}")
     print()
     
