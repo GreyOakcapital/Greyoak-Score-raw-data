@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 """
-CP7 FINAL SECURITY & STABILITY VALIDATION TEST
+CP7 QUICK VALIDATION TEST - POST FIXES
 
-Comprehensive testing of GreyOak Score Engine CP7 implementation to validate
-all security and hardening features before proceeding to documentation phase.
+Focused validation of the specific CP7 security fixes that were just implemented:
+1. CORS Headers Fix (dotenv loading, middleware configuration)
+2. Rate Limiting Headers Fix (SlowAPI headers_enabled=True)
+3. Error Schema & Correlation IDs (should still work)
+4. Health Endpoints (should return JSON, not HTML)
 
-Test Categories:
-1. CORS & Host Security Validation
-2. Rate Limiting Validation  
-3. Error Schema & Correlation ID Validation
-4. Database Pool & Lazy Initialization
-5. Migration & Health Endpoint Validation
-6. Production Configuration Validation
+This test validates the critical fixes made to resolve the previously failing CP7 features.
 """
 
 import asyncio
@@ -24,10 +21,11 @@ from typing import Dict, List, Any
 from datetime import datetime
 
 class CP7SecurityTester:
-    """Comprehensive CP7 security and stability tester"""
+    """Focused CP7 security fixes validator"""
     
     def __init__(self):
         self.base_url = "https://greyoak-score-1.preview.emergentagent.com"
+        self.test_origin = "https://greyoak-score-1.preview.emergentagent.com"
         self.test_results = []
         self.failed_tests = []
         
