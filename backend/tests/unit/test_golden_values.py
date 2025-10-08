@@ -76,19 +76,19 @@ class TestGoldenValues:
 
     @pytest.fixture
     def golden_fundamentals_data(self):
-        """Fixed fundamentals data for golden tests."""
+        """Fixed fundamentals data for golden tests with varied values."""
         return pd.DataFrame({
-            'ticker': ['RELIANCE', 'TCS', 'HDFC'],
-            'quarter_end': pd.to_datetime(['2024-03-31'] * 3),
-            'roe_3y': [0.15, 0.28, 0.18],
-            'sales_cagr_3y': [0.08, 0.12, np.nan],  # HDFC missing (banking)
-            'eps_cagr_3y': [0.12, 0.18, np.nan],   # HDFC missing (banking)
-            'pe': [25.5, 28.2, np.nan],            # HDFC missing (banking)
-            'ev_ebitda': [12.3, 18.5, np.nan],     # HDFC missing (banking)
-            'roa_3y': [np.nan, np.nan, 0.018],     # Only HDFC (banking)
-            'gnpa_pct': [np.nan, np.nan, 1.2],     # Only HDFC (banking)
-            'pcr_pct': [np.nan, np.nan, 85.0],     # Only HDFC (banking)
-            'nim_3y': [np.nan, np.nan, 4.2]        # Only HDFC (banking)
+            'ticker': ['RELIANCE', 'TCS', 'HDFC', 'INFY', 'AXIS'],
+            'quarter_end': pd.to_datetime(['2024-03-31'] * 5),
+            'roe_3y': [0.15, 0.28, 0.18, 0.22, 0.16],  # Varied ROE values
+            'sales_cagr_3y': [0.08, 0.12, np.nan, 0.15, np.nan],  # Banking missing
+            'eps_cagr_3y': [0.12, 0.18, np.nan, 0.20, np.nan],   # Banking missing
+            'pe': [25.5, 28.2, np.nan, 24.0, np.nan],            # Banking missing
+            'ev_ebitda': [12.3, 18.5, np.nan, 16.0, np.nan],     # Banking missing
+            'roa_3y': [np.nan, np.nan, 0.018, np.nan, 0.022],    # Only banking
+            'gnpa_pct': [np.nan, np.nan, 1.2, np.nan, 0.8],      # Only banking
+            'pcr_pct': [np.nan, np.nan, 85.0, np.nan, 90.0],     # Only banking
+            'nim_3y': [np.nan, np.nan, 4.2, np.nan, 4.5]         # Only banking
         })
 
     @pytest.fixture
