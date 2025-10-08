@@ -834,6 +834,12 @@ def run_enhanced_realistic_demo():
                   f"Stocks={row['Count']:2.0f} | MCap=₹{row['Total_MCap_Cr']:6,.0f}Cr | "
                   f"3M_Ret={row['Avg_3M_Return']:+5.1f}%")
         
+        # Store weights for display
+        if mode == 'Investor':
+            mode_weights = {'F': 0.25, 'T': 0.15, 'R': 0.15, 'O': 0.20, 'Q': 0.20, 'S': 0.05}
+        else:
+            mode_weights = {'F': 0.15, 'T': 0.30, 'R': 0.25, 'O': 0.10, 'Q': 0.10, 'S': 0.10}
+        
         # Pillar strength analysis
         print(f"\n⚖️  Average Pillar Performance:")
         pillar_names = {
