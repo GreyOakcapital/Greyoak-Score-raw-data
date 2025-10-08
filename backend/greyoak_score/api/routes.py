@@ -304,7 +304,7 @@ async def get_scores_for_ticker(
         
         # Query database
         try:
-            results = db.get_scores_by_ticker(
+            results = get_db_instance().get_scores_by_ticker(
                 ticker=ticker,
                 start_date=start_date_obj,
                 end_date=end_date_obj,
