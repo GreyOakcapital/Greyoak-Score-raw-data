@@ -288,10 +288,6 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(router)
 
 
-# Register API routes first
-app.include_router(router)
-
-
 @app.get("/", tags=["root"])
 @limiter.exempt  # Exempt root endpoint from rate limiting
 async def root():
