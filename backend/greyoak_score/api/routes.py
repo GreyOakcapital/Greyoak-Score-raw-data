@@ -45,8 +45,11 @@ rate_limit = f"{rate_limit_per_minute}/minute"
 # Initialize router with CP7 enhancements
 router = APIRouter(prefix="/api/v1", tags=["scoring"])
 
-# Get database instance
-db = get_database()
+# Database instance will be lazy-loaded in endpoints
+# This prevents connection failures during module import
+def get_db_instance():
+    """Get database instance with lazy initialization."""
+    return get_database()
 
 
 @router.post(
