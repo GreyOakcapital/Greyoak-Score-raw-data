@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: greyoak_db
+    environment:
+      POSTGRES_DB: greyoak_scores
+      POSTGRES_USER: greyoak
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-greyoak_pw}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db_init:/docker-entrypoint-initdb.d
+    ports:
+      - "127.0.0.1:5432:5432"  # Only localhost access
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U greyoak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 2G
+    networks:
+      - greyoak_network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.production
+      args:
+        PYTHON_VERSION: "3.10"  # Match development environment
+    container_name: greyoak_api
+    environment:
+      - DATABASE_URL=postgresql://greyoak:${DB_PASSWORD:-greyoak_pw}@db:5432/greyoak_scores
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
+      - RATE_LIMIT_PER_MINUTE=${RATE_LIMIT_PER_MINUTE:-60}
+      - TRUST_PROXY_HEADERS=${TRUST_PROXY_HEADERS:-false}
+    ports:
+      - "127.0.0.1:8000:8000"  # Only localhost; use reverse proxy for public
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data:ro  # Read-only CSV data
+      - ./logs:/app/logs
+    command: sh -c "alembic upgrade head && uvicorn greyoak_score.api.main:app --host 0.0.0.0 --port 8000 --workers 4"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.00'
+          memory: 512M
+    networks:
+      - greyoak_network
+
+  adminer:
+    image: adminer
+    container_name: greyoak_adminer
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+    profiles:
+      - dev  # Only start with --profile dev
+    networks:
+      - greyoak_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  greyoak_network:
+    driver: bridge
