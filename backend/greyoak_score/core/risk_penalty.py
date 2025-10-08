@@ -82,7 +82,7 @@ def calculate_risk_penalty(
     
     # 3. VOLATILITY PENALTY
     stock_sigma = prices_data.get('sigma20', np.nan)
-    vol_penalty = _calculate_volatility_penalty(stock_sigma, sector_group, rp_config)
+    vol_penalty = _calculate_volatility_penalty(stock_sigma, sector_group, config)
     breakdown['volatility'] = vol_penalty
     
     # 4. EVENT WINDOW PENALTY
