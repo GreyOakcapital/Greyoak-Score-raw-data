@@ -27,13 +27,13 @@ logger = get_logger(__name__)
 
 
 def load_prices_csv(filepath: Path) -> pd.DataFrame:
-    """Load and validate prices.csv.
+    """Load price data with OHLCV and technical indicators.
     
     Args:
-        filepath: Path to prices.csv.
+        filepath: Path to prices CSV file.
         
     Returns:
-        Validated DataFrame with price data.
+        DataFrame with validated price data.
         
     Raises:
         FileNotFoundError: If file doesn't exist.
@@ -48,10 +48,16 @@ def load_prices_csv(filepath: Path) -> pd.DataFrame:
     df = pd.read_csv(filepath)
     logger.info(f"  Raw data: {len(df)} rows, {len(df.columns)} columns")
     
+    # Validate required columns before processing
+    required_cols = {"date", "ticker", "open", "high", "low", "close", "volume"}
+    missing_cols = required_cols - set(df.columns)
+    if missing_cols:
+        raise ValueError(f"Missing required price columns: {sorted(missing_cols)}")
+    
     # Convert date to datetime
     df["date"] = pd.to_datetime(df["date"]).dt.date
     
-    # Add missing indicators if needed
+    # Add missing indicators if needed (optional columns)
     df = add_missing_indicators(df)
     
     # Validate schema (sample validation on first row)
