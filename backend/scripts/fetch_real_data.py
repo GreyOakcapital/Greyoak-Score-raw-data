@@ -422,6 +422,165 @@ def generate_sector_map() -> pd.DataFrame:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
+def generate_sample_price_data() -> pd.DataFrame:
+    """Generate realistic sample price data (fallback if yfinance fails).
+    
+    Returns:
+        DataFrame with price data for all tickers.
+    """
+    logger.warning("⚠️  yfinance connection failed - generating sample data")
+    
+    import random
+    random.seed(42)  # For reproducibility
+    np.random.seed(42)
+    
+    all_prices = []
+    
+    # Generate 60 trading days
+    dates = pd.date_range(end=datetime.now(), periods=60, freq='B')  # Business days
+    
+    for ticker in TICKERS:
+        # Base price depends on stock (realistic ranges)
+        if "RELIANCE" in ticker:
+            base_price = 2750
+        elif "HDFCBANK" in ticker:
+            base_price = 1650
+        elif "TCS" in ticker:
+            base_price = 3600
+        elif "NESTLEIND" in ticker:
+            base_price = 24000
+        else:
+            base_price = random.randint(500, 2000)
+        
+        # Generate price series with realistic drift and volatility
+        sector_group = SECTOR_MAP[ticker][1]
+        
+        # Sector-specific volatility
+        if sector_group == "metals":
+            daily_vol = 0.025  # 2.5% daily vol
+        elif sector_group == "fmcg":
+            daily_vol = 0.012  # 1.2% daily vol
+        else:
+            daily_vol = 0.018  # 1.8% daily vol
+        
+        # Generate returns
+        returns = np.random.normal(0.0005, daily_vol, len(dates))  # Slight positive drift
+        prices = base_price * (1 + returns).cumprod()
+        
+        # Generate OHLC from close
+        highs = prices * (1 + np.abs(np.random.normal(0, 0.005, len(dates))))
+        lows = prices * (1 - np.abs(np.random.normal(0, 0.005, len(dates))))
+        opens = np.roll(prices, 1)
+        opens[0] = prices[0]
+        
+        # Volume
+        avg_volume = random.randint(1_000_000, 10_000_000)
+        volumes = np.random.normal(avg_volume, avg_volume * 0.3, len(dates))
+        volumes = np.maximum(volumes, 100_000)
+        
+        # Create DataFrame
+        df = pd.DataFrame({
+            "date": dates.date,
+            "ticker": ticker,
+            "open": opens,
+            "high": highs,
+            "low": lows,
+            "close": prices,
+            "volume": volumes,
+        })
+        
+        # Calculate indicators
+        df["dma20"] = df["close"].rolling(window=20).mean()
+        df["dma50"] = df["close"].rolling(window=50).mean()
+        df["dma200"] = np.nan  # Not enough data
+        df["rsi14"] = calculate_rsi(df["close"], period=14)
+        df["atr14"] = calculate_atr(df["high"], df["low"], df["close"], period=14)
+        macd_line, macd_signal = calculate_macd(df["close"])
+        df["macd_line"] = macd_line
+        df["macd_signal"] = macd_signal
+        df["hi20"] = df["high"].rolling(window=20).max()
+        df["lo20"] = df["low"].rolling(window=20).min()
+        df["ret_21d"] = df["close"].pct_change(periods=21)
+        df["ret_63d"] = np.nan  # Not enough data
+        df["ret_126d"] = np.nan  # Not enough data
+        df["sigma20"] = calculate_volatility(df["close"], period=20)
+        df["sigma60"] = calculate_volatility(df["close"], period=60)
+        
+        all_prices.append(df)
+    
+    return pd.concat(all_prices, ignore_index=True)
+
+
+def generate_sample_fundamentals() -> pd.DataFrame:
+    """Generate sample fundamentals (fallback)."""
+    logger.warning("⚠️  Generating sample fundamentals")
+    
+    rows = []
+    quarter_end = (datetime.now() - timedelta(days=30)).date()
+    
+    for ticker in TICKERS:
+        is_banking = ticker in BANKING_TICKERS
+        
+        if is_banking:
+            row = {
+                "quarter_end": quarter_end,
+                "ticker": ticker,
+                "roe_3y": np.nan,
+                "roce_3y": np.nan,
+                "eps_cagr_3y": np.nan,
+                "sales_cagr_3y": np.nan,
+                "pe": np.nan,
+                "ev_ebitda": np.nan,
+                "opm_stdev_12q": np.nan,
+                "roa_3y": np.random.uniform(0.012, 0.022),
+                "roe_3y_banking": np.random.uniform(0.12, 0.20),
+                "gnpa_pct": np.nan,  # NOT available
+                "pcr_pct": np.nan,  # NOT available
+                "nim_3y": np.nan,  # NOT available
+            }
+        else:
+            row = {
+                "quarter_end": quarter_end,
+                "ticker": ticker,
+                "roe_3y": np.random.uniform(0.10, 0.25),
+                "roce_3y": np.nan,  # Will test imputation
+                "eps_cagr_3y": np.nan,
+                "sales_cagr_3y": np.nan,
+                "pe": np.random.uniform(15, 40),
+                "ev_ebitda": np.random.uniform(10, 25),
+                "opm_stdev_12q": np.nan,
+                "roa_3y": np.nan,
+                "roe_3y_banking": np.nan,
+                "gnpa_pct": np.nan,
+                "pcr_pct": np.nan,
+                "nim_3y": np.nan,
+            }
+        
+        rows.append(row)
+    
+    return pd.DataFrame(rows)
+
+
+def generate_sample_ownership() -> pd.DataFrame:
+    """Generate sample ownership (fallback)."""
+    logger.warning("⚠️  Generating sample ownership")
+    
+    rows = []
+    quarter_end = (datetime.now() - timedelta(days=30)).date()
+    
+    for ticker in TICKERS:
+        row = {
+            "quarter_end": quarter_end,
+            "ticker": ticker,
+            "promoter_hold_pct": np.random.uniform(0.40, 0.65),
+            "promoter_pledge_frac": 0.0,  # NOT available from yfinance
+            "fii_dii_delta_pp": 0.0,  # NOT available from yfinance
+        }
+        rows.append(row)
+    
+    return pd.DataFrame(rows)
+
+
 def main() -> int:
     """Fetch all data and save to CSV files.
     
@@ -437,32 +596,44 @@ def main() -> int:
     data_dir.mkdir(exist_ok=True)
     
     try:
-        # 1. Fetch price data
-        prices_df = fetch_price_data()
+        # Try yfinance first, fallback to sample data
+        try:
+            logger.info("Attempting to fetch data from Yahoo Finance...")
+            prices_df = fetch_price_data()
+            fundamentals_df = fetch_fundamentals_data()
+            ownership_df = fetch_ownership_data()
+            data_source = "yfinance (Yahoo Finance)"
+        except Exception as yf_error:
+            logger.warning(f"⚠️  yfinance failed: {yf_error}")
+            logger.info("Generating sample data as fallback...")
+            prices_df = generate_sample_price_data()
+            fundamentals_df = generate_sample_fundamentals()
+            ownership_df = generate_sample_ownership()
+            data_source = "Generated sample data (yfinance unavailable)"
+        
+        # Generate sector map (always static)
+        sector_map_df = generate_sector_map()
+        
+        # Save all CSVs
         prices_path = data_dir / "prices.csv"
         prices_df.to_csv(prices_path, index=False)
         logger.info(f"✅ Saved: {prices_path}")
         
-        # 2. Fetch fundamentals
-        fundamentals_df = fetch_fundamentals_data()
         fundamentals_path = data_dir / "fundamentals.csv"
         fundamentals_df.to_csv(fundamentals_path, index=False)
         logger.info(f"✅ Saved: {fundamentals_path}")
         
-        # 3. Fetch ownership
-        ownership_df = fetch_ownership_data()
         ownership_path = data_dir / "ownership.csv"
         ownership_df.to_csv(ownership_path, index=False)
         logger.info(f"✅ Saved: {ownership_path}")
         
-        # 4. Generate sector map
-        sector_map_df = generate_sector_map()
         sector_map_path = data_dir / "sector_map.csv"
         sector_map_df.to_csv(sector_map_path, index=False)
         logger.info(f"✅ Saved: {sector_map_path}")
         
         logger.info("=" * 80)
-        logger.info("✅ All data fetched successfully!")
+        logger.info(f"✅ All data saved successfully!")
+        logger.info(f"   Data source: {data_source}")
         logger.info("=" * 80)
         logger.info(f"  Prices: {len(prices_df)} records")
         logger.info(f"  Fundamentals: {len(fundamentals_df)} records")
