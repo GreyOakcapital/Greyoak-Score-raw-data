@@ -119,30 +119,22 @@ def calculate_risk_penalty(
 def _calculate_liquidity_penalty(
     mtv_cr: float,
     mode: str,
-    config: Dict
+    config: ConfigManager
 ) -> float:
     """Calculate liquidity penalty based on MTV (₹Cr)."""
     if pd.isna(mtv_cr) or mtv_cr < 0:
         mtv_cr = 0.0
     
-    liquidity_config = config.get("liquidity", {})
+    # Get liquidity penalty bins for mode
+    liquidity_bins = config.get_liquidity_penalties(mode)
     
-    if mode == "trader":
-        thresholds = liquidity_config.get("trader", {})
-        if mtv_cr < thresholds.get("low", 3.0):
-            return 10.0
-        elif mtv_cr < thresholds.get("medium", 5.0):
-            return 5.0
-        else:
-            return 0.0
-    else:  # investor
-        thresholds = liquidity_config.get("investor", {})
-        if mtv_cr < thresholds.get("low", 2.0):
-            return 10.0
-        elif mtv_cr < thresholds.get("medium", 5.0):
-            return 5.0
-        else:
-            return 0.0
+    # Find applicable penalty (bins are sorted descending by threshold)
+    for bin_config in liquidity_bins:
+        if mtv_cr >= bin_config["threshold"]:
+            return float(bin_config["penalty"])
+    
+    # If no threshold matches, return highest penalty (should not happen)
+    return 10.0
 
 
 def _calculate_pledge_penalty(pledge_frac: float, config: Dict) -> float:
