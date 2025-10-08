@@ -12,11 +12,16 @@ Endpoints:
 - GET /api/v1/health - Health check with database connectivity
 """
 
-from fastapi import APIRouter, HTTPException, Query, Path
+from fastapi import APIRouter, HTTPException, Query, Path, Request
 from typing import List, Optional
 from datetime import datetime, timezone
+import os
 import re
 import psycopg2
+
+# Rate limiting
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 from greyoak_score.api.schemas import (
     ScoreRequest, ScoreResponse, HealthResponse, 
@@ -30,7 +35,14 @@ from greyoak_score.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-# Initialize router
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
+
+# Get rate limit from environment
+rate_limit_per_minute = os.getenv('RATE_LIMIT', '60')
+rate_limit = f"{rate_limit_per_minute}/minute"
+
+# Initialize router with CP7 enhancements
 router = APIRouter(prefix="/api/v1", tags=["scoring"])
 
 # Get database instance
