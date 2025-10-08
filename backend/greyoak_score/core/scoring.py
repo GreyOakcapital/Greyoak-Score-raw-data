@@ -36,9 +36,10 @@ def calculate_greyoak_score(
     prices_data: pd.Series,
     fundamentals_data: pd.Series,
     ownership_data: pd.Series,
-    sector_data: pd.DataFrame,  # All sector stocks for normalization
-    market_data: pd.DataFrame,  # Market benchmark (NIFTY)
-    sector_group: str,
+    all_prices_df: pd.DataFrame,  # All prices for sector normalization
+    all_fundamentals_df: pd.DataFrame,  # All fundamentals for sector normalization
+    all_ownership_df: pd.DataFrame,  # All ownership for sector normalization
+    sector_map_df: pd.DataFrame,  # Ticker to sector mapping
     mode: Literal["trader", "investor"],
     config: ConfigManager,
     scoring_date: Optional[datetime] = None
