@@ -44,22 +44,21 @@ def calculate_greyoak_score(
     scoring_date: Optional[datetime] = None
 ) -> ScoreOutput:
     """
-    Calculate complete GreyOak Score with all pillars, RP, and guardrails.
+    Calculate complete GreyOak Score from pre-calculated pillars, RP, and guardrails.
     
-    This is the main entry point for scoring any stock. It orchestrates
-    the complete pipeline from pillar calculation to final banding.
+    This is the main scoring orchestrator that combines pillar scores with weights,
+    calculates risk penalty, applies guardrails, and generates final score.
     
     Args:
         ticker: Stock ticker symbol
+        pillar_scores: Pre-calculated pillar scores {F: 75.0, T: 80.0, R: 70.0, O: 85.0, Q: 78.0, S: 82.0}
         prices_data: Latest price/technical data for the stock
         fundamentals_data: Latest fundamental data for the stock
         ownership_data: Latest ownership/promoter data for the stock
-        all_prices_df: All price data for sector normalization
-        all_fundamentals_df: All fundamental data for sector normalization
-        all_ownership_df: All ownership data for sector normalization  
-        sector_map_df: Ticker to sector group mapping
+        sector_group: Sector classification (e.g., "it", "banks", "metals")
         mode: Trading mode ("trader" or "investor")
         config: Configuration manager instance
+        s_z: Sector momentum z-score (for SectorBear guardrail)
         scoring_date: Date for scoring (defaults to current UTC time)
         
     Returns:
