@@ -44,10 +44,10 @@ class TestWinsorization:
         
         result = winsorize_by_sector(df, "sector_group", ["metric"])
         
-        # Sector A: range 0-49, winsorized to ~1-48
+        # Sector A: range 0-49, winsorized to ~0.49-48.51
         sector_a = result[result["sector_group"] == "A"]
-        assert sector_a["metric"].min() >= 1
-        assert sector_a["metric"].max() <= 48
+        assert sector_a["metric"].min() >= 0.4  # Allow tolerance
+        assert sector_a["metric"].max() <= 48.6
         
         # Sector B: range 100-149, winsorized to ~101-148
         sector_b = result[result["sector_group"] == "B"]
