@@ -246,8 +246,8 @@ def _calculate_governance_penalty(fundamentals_data: pd.Series, config: ConfigMa
         gov_penalty += gov_params.get("auditor_qualification", 2.0)
     
     # Check for high OPM volatility as proxy for management instability
-    omp_stdev = fundamentals_data.get('opm_stdev_12q', np.nan)
-    if not pd.isna(omp_stdev) and omp_stdev > 0.10:  # High OPM volatility
+    opm_stdev = fundamentals_data.get('opm_stdev_12q', np.nan)
+    if not pd.isna(opm_stdev) and opm_stdev > 0.10:  # High OPM volatility
         gov_penalty += gov_params.get("board_resignation", 1.0)
     
     # Cap at reasonable maximum (use auditor qualification penalty × 2 as max)
