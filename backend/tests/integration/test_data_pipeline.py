@@ -120,7 +120,7 @@ class TestFullDataPipeline:
         sector_counts = clean_prices.groupby("sector_group")["ticker"].nunique()
         
         # All our sectors should have ≤ 4 stocks (by design)
-        assert all(count <= 4 for count in sector_counts.values())
+        assert all(count <= 4 for count in sector_counts.values)
         
         # Normalize a metric
         points = normalize_metric(
