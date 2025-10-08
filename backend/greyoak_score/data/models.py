@@ -34,7 +34,7 @@ class DailyPriceData(BaseModel):
     """
 
     ticker: str = Field(..., description="Stock ticker symbol (e.g., RELIANCE.NS)")
-    date: date = Field(..., description="Trading date (YYYY-MM-DD)")
+    trading_date: date = Field(..., description="Trading date (YYYY-MM-DD)", alias="date")
     
     # OHLCV data (adjusted for splits, bonuses, dividends)
     open: float = Field(..., gt=0, description="Adjusted open price")
