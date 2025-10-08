@@ -276,6 +276,7 @@ class TestGoldenValues:
         # Create data with potential numerical issues
         edge_case_data = pd.DataFrame({
             'ticker': ['EDGE1', 'EDGE2', 'EDGE3'],
+            'quarter_end': pd.to_datetime(['2024-03-31'] * 3),  # Add missing column
             'sector_group': ['test'] * 3,
             'roe_3y': [1e-10, 0.999999, -1e-8],  # Very small/large values
             'sales_cagr_3y': [0.0001, 999.99, np.inf],  # Edge cases
