@@ -370,8 +370,7 @@ def compare_scores(
             'S': output.pillars.S,
             'RP': output.risk_penalty,
             'Flags': len(output.guardrail_flags),
-            'Confidence': output.confidence,
-            'Sector': output.sector_group
+            'Confidence': output.confidence
         })
     
     df = pd.DataFrame(data)
