@@ -365,11 +365,14 @@ async def get_scores_for_ticker(
     responses={
         400: {"model": ErrorResponse, "description": "Invalid parameters"},
         404: {"model": ErrorResponse, "description": "No stocks found"},
+        429: {"model": ErrorResponse, "description": "Rate limit exceeded"},
         500: {"model": ErrorResponse, "description": "Database error"}
     },
-    summary="Get Stocks by Investment Band",
-    description="""
+    summary="Get Stocks by Investment Band (Rate Limited)",
+    description=f"""
     Get all stocks with a specific investment band on a given date.
+    
+    **Rate Limiting:** {rate_limit_per_minute} requests per minute per IP address.
     
     **Use Cases:**
     - Portfolio screening and stock picking
