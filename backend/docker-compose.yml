@@ -2,7 +2,10 @@ version: "3.9"
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
     container_name: greyoak-api
     env_file: .env
     ports:
@@ -11,18 +14,38 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./:/app
       - ./logs:/app/logs
-    command: uvicorn greyoak_score.api.main:app --host 0.0.0.0 --port 8000 --reload
+      - ./configs:/app/configs:ro
+      - ./data:/app/data:ro
+    command: >
+      sh -c "
+      alembic upgrade head &&
+      uvicorn greyoak_score.api.main:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-config /app/logging.conf
+      "
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     restart: unless-stopped
     networks:
       - greyoak-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/tmp
+    user: "1001:1001"
 
   db:
     image: postgres:15-alpine
@@ -31,19 +54,31 @@ services:
       POSTGRES_USER: ${PGUSER}
       POSTGRES_PASSWORD: ${PGPASSWORD}
       POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db_init:/docker-entrypoint-initdb.d
+      - ./db_init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${PGUSER} -d ${PGDATABASE}"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     restart: unless-stopped
     networks:
       - greyoak-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    security_opt:
+      - no-new-privileges:true
 
   adminer:
     image: adminer:4
@@ -55,10 +90,21 @@ services:
     restart: unless-stopped
     networks:
       - greyoak-network
+    profiles:
+      - dev
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
 
 volumes:
   pgdata:
+    driver: local
 
 networks:
   greyoak-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: greyoak-br
+      com.docker.network.driver.mtu: 1500
