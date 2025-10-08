@@ -53,8 +53,7 @@ class QualityPillar(BasePillar):
         self._validate_quality_data(fundamentals_df)
         
         # Get configuration
-        config = self.config.get_quality_config()
-        weights = config["weights"]
+        weights = self.config.get_quality_config()  # Returns weights directly
         
         # Get latest fundamentals data
         latest_fund = self.get_latest_data_by_ticker(fundamentals_df)
