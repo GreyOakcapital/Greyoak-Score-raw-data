@@ -255,20 +255,56 @@ backend/
 
 ---
 
-## Configuration
+## ⚙️ Configuration Management
 
-All parameters are externalized in YAML files (no hard-coded values):
+### Environment-Based Configuration (CP7)
 
-- **score.yaml**: Pillar weights, RP parameters, guardrail thresholds, band cutoffs
-- **sector_map.yaml**: Ticker-to-sector mapping, sector group definitions
-- **freshness.yaml**: Data freshness SLOs, confidence weights
-- **data_sources.yaml**: Vendor configuration (future use)
+All configuration is **externalized** with zero hard-coded values, supporting multiple environments:
 
-Validate configs after editing:
+#### **YAML Configuration Files**
+- **`score.yaml`**: Pillar weights, risk penalty parameters, guardrail thresholds, investment band cutoffs
+- **`sector_map.yaml`**: Ticker-to-sector mapping, sector group definitions, industry classifications
+- **`freshness.yaml`**: Data freshness SLAs, confidence weights, staleness penalties
+- **`data_sources.yaml`**: Data vendor configuration, API endpoints (future use)
+- **`barriers.yaml`**: Market barrier definitions, liquidity thresholds
 
+#### **Environment Variables (.env)**
 ```bash
-make validate-config
+# Database Configuration
+PGUSER=greyoak_prod
+PGPASSWORD=secure_random_password
+PGDATABASE=greyoak_scores
+DATABASE_URL=postgresql://user:pass@host:port/db
+
+# Security Configuration (CP7)
+CORS_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+RATE_LIMIT=60
+TRUSTED_HOSTS=yourdomain.com,app.yourdomain.com
+
+# Performance Configuration
+DB_POOL_MIN_CONN=5
+DB_POOL_MAX_CONN=50
+WORKERS=4
 ```
+
+#### **Configuration Validation**
+```bash
+# Validate all configuration files
+make validate-config
+
+# Check configuration hash for determinism
+python -c "
+from greyoak_score.core.config_manager import ConfigManager
+from pathlib import Path
+cm = ConfigManager(Path('configs'))
+print(f'Config Hash: {cm.config_hash}')"
+```
+
+### Configuration Security
+- ✅ **No Secrets in Code**: All sensitive data in environment variables
+- ✅ **Configuration Hashing**: Deterministic config fingerprinting for audit trail
+- ✅ **Validation**: Automatic validation of all configuration files on startup
+- ✅ **Environment Isolation**: Separate configurations for dev/staging/production
 
 ---
 
