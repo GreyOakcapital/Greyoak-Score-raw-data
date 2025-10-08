@@ -109,7 +109,7 @@ async def calculate_score_endpoint(request: ScoreRequest):
         }
         
         # Mock additional data (in production, loaded from CSV/database)
-        from pandas import Series
+        import pandas as pd
         mock_prices_data = Series({
             'close': 2500.0,
             'volume': 1000000,
