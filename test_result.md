@@ -131,15 +131,18 @@ backend:
 
   - task: "Final Scoring Engine"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/greyoak_score/core/scoring.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Just implemented the main scoring orchestrator that combines all pillars, applies weights, calculates RP, applies guardrails, and generates ScoreOutput. Needs unit testing."
+      - working: true
+        agent: "testing"
+        comment: "All 15 unit tests passing with 100% coverage (103 statements, 0 missed). Scoring engine successfully orchestrates pillar weighting, risk penalty calculation, and guardrails application. Complete ScoreOutput generation working correctly."
 
   - task: "Scoring Unit Tests"
     implemented: false
