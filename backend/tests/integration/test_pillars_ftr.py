@@ -106,12 +106,17 @@ class TestPillarsFTRIntegration:
         clean_prices, clean_fund, clean_own, _, _ = clean_data
         sector_map_df = clean_prices.groupby('ticker')['sector_group'].first().reset_index()
         
+        # Remove sector_group from prices to avoid merge conflicts
+        clean_prices_no_sector = clean_prices.drop(columns=['sector_group'], errors='ignore')
+        clean_fund_no_sector = clean_fund.drop(columns=['sector_group'], errors='ignore')
+        clean_own_no_sector = clean_own.drop(columns=['sector_group'], errors='ignore')
+        
         # Create pillar
         r_pillar = RelativeStrengthPillar(config_manager)
         
         # Calculate scores
         result = r_pillar.calculate(
-            clean_prices, clean_fund, clean_own, sector_map_df
+            clean_prices_no_sector, clean_fund_no_sector, clean_own_no_sector, sector_map_df
         )
         
         # Verify results
