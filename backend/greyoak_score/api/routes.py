@@ -243,7 +243,9 @@ async def calculate_score_endpoint(request_obj: Request, request: ScoreRequest):
     **Results:** Ordered by date DESC (most recent first)
     """
 )
+@limiter.limit(rate_limit)
 async def get_scores_for_ticker(
+    request: Request,
     ticker: str = Path(..., description="Stock ticker symbol (e.g., 'RELIANCE.NS')"),
     start_date: Optional[str] = Query(None, description="Start date filter (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date filter (YYYY-MM-DD)"),
