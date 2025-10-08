@@ -105,13 +105,13 @@ async def lifespan(app: FastAPI):
     logger.info("👋 GreyOak Score API shutdown complete")
 
 
-# Initialize FastAPI application
+# Initialize FastAPI application with CP7 security enhancements
 app = FastAPI(
     title="GreyOak Score API",
     description="""
-    **GreyOak Score Engine API** - Professional stock scoring system for Indian equities.
+    **GreyOak Score Engine API** - Production-ready stock scoring system for Indian equities.
     
-    ## Features
+    ## 🎯 Features (CP7 Enhanced)
     
     * **Calculate Scores**: Generate comprehensive 0-100 scores with investment bands
     * **Six Pillars**: Fundamentals, Technicals, Relative Strength, Ownership, Quality, Sector Momentum  
@@ -119,23 +119,37 @@ app = FastAPI(
     * **Dual Modes**: Trader (short-term) and Investor (long-term) perspectives
     * **Audit Trail**: Complete deterministic scoring with configuration tracking
     
-    ## Quick Start
+    ## 🔒 Security Features (CP7)
+    
+    * **Rate Limiting**: 60 requests/minute per IP (configurable)
+    * **CORS Protection**: Configurable origin restrictions
+    * **Trusted Hosts**: Host header validation
+    * **Connection Pooling**: Efficient database connections (2-20 pool)
+    * **Health Monitoring**: Dual health endpoints for infrastructure and application
+    
+    ## 🚀 Quick Start
     
     1. **Calculate a score**: `POST /api/v1/calculate`
     2. **Get score history**: `GET /api/v1/scores/{ticker}`
     3. **Find by investment band**: `GET /api/v1/scores/band/{band}`
+    4. **Health check**: `GET /health` (infra) or `GET /api/v1/health` (app)
     
-    ## Investment Bands
+    ## 📊 Investment Bands
     
     * **Strong Buy** (75-100): High conviction opportunities
     * **Buy** (65-74): Good investment prospects  
     * **Hold** (50-64): Neutral outlook, maintain positions
     * **Avoid** (0-49): High risk, avoid or exit
     
-    ## Modes
+    ## ⚡ Modes
     
     * **Trader**: Short-term focus (1-6 months), technical emphasis
     * **Investor**: Long-term focus (12-24 months), fundamental emphasis
+    
+    ## 🏥 Health Endpoints
+    
+    * **`GET /health`**: Infrastructure health check (no database)
+    * **`GET /api/v1/health`**: Application health check (with database)
     """,
     version=greyoak_score.__version__,
     docs_url="/docs",
