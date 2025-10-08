@@ -423,7 +423,7 @@ async def get_stocks_by_band(
         
         # Query database
         try:
-            results = db.get_scores_by_band(
+            results = get_db_instance().get_scores_by_band(
                 band=band,
                 date=date_obj,
                 mode=mode,
