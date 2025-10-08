@@ -179,7 +179,7 @@ async def calculate_score_endpoint(request_obj: Request, request: ScoreRequest):
         
         # Save to database
         try:
-            row_id = db.save_score(score_result)
+            row_id = get_db_instance().save_score(score_result)
             logger.info(f"Score saved to database with ID {row_id}")
         except Exception as e:
             logger.warning(f"Failed to save score to database: {e}")
