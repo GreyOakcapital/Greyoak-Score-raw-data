@@ -307,8 +307,9 @@ def calculate_demo_pillar_scores(stock_data: Dict, mode: str) -> Dict[str, float
 def create_demo_score_result(ticker: str, date: date, mode: str, pillar_scores: Dict, stock_data: Dict, config: ConfigManager):
     """Create a demo ScoreOutput object."""
     
-    # Get pillar weights for the mode
-    weights = config.get_pillar_weights(mode)
+    # Get pillar weights for the mode (using IT sector as default)
+    sector_group = stock_data.get('sector', 'IT')
+    weights = config.get_pillar_weights(sector_group, mode)
     
     # Calculate weighted score
     weighted_score = sum(pillar_scores[pillar] * weights[pillar] for pillar in weights.keys())
