@@ -49,10 +49,10 @@ class TestWinsorization:
         assert sector_a["metric"].min() >= 0.4  # Allow tolerance
         assert sector_a["metric"].max() <= 48.6
         
-        # Sector B: range 100-149, winsorized to ~101-148
+        # Sector B: range 100-149, winsorized to ~100.49-148.51
         sector_b = result[result["sector_group"] == "B"]
-        assert sector_b["metric"].min() >= 101
-        assert sector_b["metric"].max() <= 148
+        assert sector_b["metric"].min() >= 100.4  # Allow tolerance
+        assert sector_b["metric"].max() <= 148.6
 
     def test_winsorize_small_sector(self):
         """Test winsorization with very small sector (< 2 values)."""
