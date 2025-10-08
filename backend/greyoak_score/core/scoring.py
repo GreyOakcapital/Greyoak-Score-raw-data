@@ -33,15 +33,14 @@ logger = get_logger(__name__)
 
 def calculate_greyoak_score(
     ticker: str,
+    pillar_scores: Dict[str, float],  # Pre-calculated pillar scores {F: 75.0, T: 80.0, ...}
     prices_data: pd.Series,
-    fundamentals_data: pd.Series,
+    fundamentals_data: pd.Series, 
     ownership_data: pd.Series,
-    all_prices_df: pd.DataFrame,  # All prices for sector normalization
-    all_fundamentals_df: pd.DataFrame,  # All fundamentals for sector normalization
-    all_ownership_df: pd.DataFrame,  # All ownership for sector normalization
-    sector_map_df: pd.DataFrame,  # Ticker to sector mapping
+    sector_group: str,
     mode: Literal["trader", "investor"],
     config: ConfigManager,
+    s_z: float = 0.0,  # Sector momentum z-score (for guardrails)
     scoring_date: Optional[datetime] = None
 ) -> ScoreOutput:
     """
