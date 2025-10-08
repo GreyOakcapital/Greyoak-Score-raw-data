@@ -436,8 +436,6 @@ def run_nse_scoring_demo():
                         if len(mode_results) == 0:
                             print(f"   Debug - First error for {ticker}: {e}")
                         continue
-                    
-                    # This section is now handled above in the try block
             
             # Progress indication
             progress = (batch_idx + 1) / total_batches * 100
