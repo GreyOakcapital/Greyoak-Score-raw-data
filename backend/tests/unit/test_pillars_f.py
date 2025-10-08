@@ -16,22 +16,25 @@ class TestFundamentalsPillar:
         """Mock configuration manager."""
         config = Mock(spec=ConfigManager)
         
-        # Mock non-financial weights
-        config.get_non_financial_fundamentals_weights.return_value = {
-            "roe_3y": 0.35,
-            "sales_cagr_3y": 0.25,
-            "eps_cagr_3y": 0.20,
-            "valuation": 0.20
-        }
+        # Mock fundamentals weights method
+        def mock_fundamentals_weights(is_banking):
+            if is_banking:
+                return {
+                    "roa_3y": 0.30,
+                    "roe_3y": 0.25,
+                    "gnpa_pct": 0.20,
+                    "pcr_pct": 0.15,
+                    "nim_3y": 0.10
+                }
+            else:
+                return {
+                    "roe_3y": 0.35,
+                    "sales_cagr_3y": 0.25,
+                    "eps_cagr_3y": 0.20,
+                    "valuation": 0.20
+                }
         
-        # Mock banking weights
-        config.get_banking_fundamentals_weights.return_value = {
-            "roa_3y": 0.30,
-            "roe_3y": 0.25,
-            "gnpa_pct": 0.20,
-            "pcr_pct": 0.15,
-            "nim_3y": 0.10
-        }
+        config.get_fundamentals_weights.side_effect = mock_fundamentals_weights
         
         # Mock sector classification
         config.is_banking_sector.side_effect = lambda x: x in ["banks", "psu_banks"]
