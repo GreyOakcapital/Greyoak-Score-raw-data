@@ -158,7 +158,7 @@ class TestSaveScore:
         # Verify parameters
         params = call_args[0][1]
         assert params[0] == sample_score_output.ticker
-        assert params[1] == sample_score_output.date
+        assert params[1] == sample_score_output.scoring_date
         assert params[2] == sample_score_output.mode
     
     def test_save_score_invalid_input(self, mock_db):
