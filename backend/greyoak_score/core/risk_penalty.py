@@ -77,7 +77,7 @@ def calculate_risk_penalty(
     
     # 2. PLEDGE BINS (for RP, separate from O pillar)
     pledge_frac = ownership_data.get('promoter_pledge_frac', 0.0)
-    pledge_penalty = _calculate_pledge_penalty(pledge_frac, rp_config)
+    pledge_penalty = _calculate_pledge_penalty(pledge_frac, config)
     breakdown['pledge'] = pledge_penalty
     
     # 3. VOLATILITY PENALTY
