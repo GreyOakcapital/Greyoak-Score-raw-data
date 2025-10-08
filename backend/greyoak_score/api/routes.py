@@ -553,7 +553,7 @@ async def health_check_detailed():
         db_stats = None
         if db_status == "healthy":
             try:
-                db_stats = db.get_database_stats()
+                db_stats = get_db_instance().get_database_stats()
             except Exception as e:
                 logger.warning(f"Failed to get database stats: {e}")
         
