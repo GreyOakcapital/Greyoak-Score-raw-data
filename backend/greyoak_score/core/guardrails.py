@@ -281,7 +281,7 @@ def explain_guardrail(guardrail_name: str, **kwargs) -> str:
         Human-readable explanation string
     """
     explanations = {
-        "LowDataHold": lambda: f"Data confidence {kwargs.get('confidence', 'N/A'):.1%} is below 70% threshold",
+        "LowDataHold": lambda: f"Data confidence {kwargs.get('confidence', 0.0):.1%} is below 70% threshold",
         "Illiquidity": lambda: f"Median traded value {kwargs.get('mtv_cr', 0):.1f}₹Cr is below liquidity threshold for {kwargs.get('mode', 'N/A')} mode",
         "PledgeCap": lambda: f"Promoter pledge {kwargs.get('pledge_frac', 0)*100:.1f}% exceeds 10% threshold",
         "HighRiskCap": lambda: f"Risk penalty {kwargs.get('risk_penalty', 0):.1f} exceeds 15-point threshold",
