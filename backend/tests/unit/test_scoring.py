@@ -301,36 +301,30 @@ class TestScoringEngine:
                 assert result.sector_group == "banks"
                 assert result.mode == "investor"
     
-    def test_calculate_greyoak_score_with_custom_date(
-        self, config_manager, sample_prices_data, sample_fundamentals_data,
-        sample_ownership_data, sample_sector_data, sample_market_data
-    ):
+    def test_calculate_greyoak_score_with_custom_date(self, config_manager, sample_prices_data,
+                                                      sample_fundamentals_data, sample_ownership_data):
         """Test scoring with custom scoring date."""
         custom_date = datetime(2024, 10, 15, tzinfo=timezone.utc)
         
-        with patch('greyoak_score.core.scoring.calculate_fundamentals_pillar', return_value=75.0):
-            with patch('greyoak_score.core.scoring.calculate_technicals_pillar', return_value=70.0):
-                with patch('greyoak_score.core.scoring.calculate_relative_strength_pillar', return_value=65.0):
-                    with patch('greyoak_score.core.scoring.calculate_ownership_pillar', return_value=75.0):
-                        with patch('greyoak_score.core.scoring.calculate_quality_pillar', return_value=68.0):
-                            with patch('greyoak_score.core.scoring.calculate_sector_momentum_pillar', return_value=(72.0, 0.5)):
-                                with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(3.0, {})):
-                                    with patch('greyoak_score.core.scoring.apply_guardrails', return_value=(70.0, "Buy", [])):
-                                        
-                                        result = calculate_greyoak_score(
-                                            ticker="TESTSTOCK",
-                                            prices_data=sample_prices_data,
-                                            fundamentals_data=sample_fundamentals_data,
-                                            ownership_data=sample_ownership_data,
-                                            sector_data=sample_sector_data,
-                                            market_data=sample_market_data,
-                                            sector_group="it",
-                                            mode="trader",
-                                            config=config_manager,
-                                            scoring_date=custom_date
-                                        )
-                                        
-                                        assert result.as_of == custom_date
+        with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(3.0, {})):
+            with patch('greyoak_score.core.scoring.apply_guardrails', return_value=(70.0, "Buy", [])):
+                
+                pillar_scores = {'F': 75.0, 'T': 70.0, 'R': 65.0, 'O': 75.0, 'Q': 68.0, 'S': 72.0}
+                
+                result = calculate_greyoak_score(
+                    ticker="TESTSTOCK",
+                    pillar_scores=pillar_scores,
+                    prices_data=sample_prices_data,
+                    fundamentals_data=sample_fundamentals_data,
+                    ownership_data=sample_ownership_data,
+                    sector_group="it",
+                    mode="trader",
+                    config=config_manager,
+                    s_z=0.5,
+                    scoring_date=custom_date
+                )
+                
+                assert result.as_of == custom_date
     
     def test_calculate_greyoak_score_weight_application(
         self, config_manager, sample_prices_data, sample_fundamentals_data,
