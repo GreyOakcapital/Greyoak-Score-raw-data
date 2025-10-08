@@ -114,56 +114,144 @@ curl -X POST "http://localhost:8000/api/v1/calculate" \
 
 ---
 
-## Project Structure
+## 🏗️ Architecture & Structure
+
+### System Architecture (CP7)
 
 ```
-/app/backend/
-├── greyoak_score/          # Main package
-│   ├── core/               # Core scoring engine
-│   │   ├── config_manager.py
-│   │   ├── data_hygiene.py
-│   │   ├── normalization.py
-│   │   ├── risk_penalty.py
-│   │   ├── guardrails.py
-│   │   └── scoring.py
-│   ├── pillars/            # Six pillar calculators
-│   │   ├── fundamentals.py
-│   │   ├── technicals.py
-│   │   ├── relative_strength.py
-│   │   ├── ownership.py
-│   │   ├── quality.py
-│   │   └── sector_momentum.py
-│   ├── data/               # Data layer
-│   │   ├── models.py
-│   │   ├── ingestion.py
-│   │   └── persistence.py
-│   ├── api/                # FastAPI endpoints
-│   │   ├── main.py
-│   │   └── routes.py
-│   └── utils/              # Utilities
-│       ├── constants.py
-│       ├── logger.py
-│       └── validators.py
-├── configs/                # YAML configurations
-│   ├── score.yaml
-│   ├── sector_map.yaml
-│   ├── freshness.yaml
-│   └── data_sources.yaml
-├── data/                   # Sample CSV data
-├── tests/                  # Test suite
-│   ├── unit/
-│   ├── integration/
-│   ├── validation/
-│   └── api/
-├── scripts/                # Utility scripts
-│   ├── generate_sample_data.py
-│   └── validate_config.py
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── Makefile
-└── README.md
+┌─────────────────────────────────────────────────────────────┐
+│                 Load Balancer / Proxy                       │
+│              (Nginx/HAProxy + SSL/TLS)                      │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│              GreyOak Score API (CP7)                        │
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │         Security Layer (Production Hardened)            ││
+│  │  • CORS Protection (origin-based)                      ││
+│  │  • Rate Limiting (60 req/min per IP)                   ││
+│  │  • Request Correlation IDs                             ││
+│  │  • Trusted Host Validation                             ││
+│  └─────────────────────────────────────────────────────────┘│
+│  ┌─────────────────────────────────────────────────────────┐│
+│  │              Application Layer                          ││
+│  │  • FastAPI + Pydantic Validation                       ││
+│  │  • Six-Pillar Scoring Engine                           ││
+│  │  • Risk Penalties & Sequential Guardrails              ││
+│  │  • Connection Pool (2-20 connections)                  ││
+│  │  • Health Monitoring & Metrics                         ││
+│  └─────────────────────────────────────────────────────────┘│
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│            PostgreSQL Database (15+)                        │
+│  • Score storage with audit trail                          │
+│  • Alembic migrations for schema management                │
+│  • Connection pooling with retry logic                     │
+│  • Performance optimization & indexing                     │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### Project Structure
+
+```
+backend/
+├── greyoak_score/              # 📦 Main Package
+│   ├── __init__.py
+│   ├── version.py
+│   ├── core/                   # 🧠 Core Scoring Engine
+│   │   ├── config_manager.py   #   Configuration management
+│   │   ├── data_hygiene.py     #   Data cleaning & validation
+│   │   ├── normalization.py    #   Sector normalization (z-score/ECDF)
+│   │   ├── risk_penalty.py     #   Risk penalty calculations
+│   │   ├── guardrails.py       #   Sequential guardrail system
+│   │   └── scoring.py          #   Final scoring orchestration
+│   ├── pillars/                # 📊 Six Pillar Calculators
+│   │   ├── base.py             #   Base pillar class
+│   │   ├── fundamentals.py     #   (F) Financial metrics & ratios
+│   │   ├── technicals.py       #   (T) Technical indicators
+│   │   ├── relative_strength.py#   (R) Momentum & performance
+│   │   ├── ownership.py        #   (O) Institutional ownership
+│   │   ├── quality.py          #   (Q) Financial quality metrics
+│   │   └── sector_momentum.py  #   (S) Sector-relative performance
+│   ├── data/                   # 💾 Data Layer (CP7)
+│   │   ├── models.py           #   Pydantic data models
+│   │   ├── ingestion.py        #   Data loading & processing
+│   │   ├── persistence.py      #   PostgreSQL with connection pooling
+│   │   └── indicators.py       #   Technical indicator calculations
+│   ├── api/                    # 🌐 FastAPI Layer (CP7)
+│   │   ├── main.py             #   Application with security hardening
+│   │   ├── routes.py           #   API endpoints with rate limiting
+│   │   ├── schemas.py          #   Request/response validation
+│   │   └── dependencies.py     #   Dependency injection
+│   └── utils/                  # 🔧 Utilities
+│       ├── constants.py        #   Application constants
+│       ├── logger.py           #   Structured logging
+│       └── validators.py       #   Custom validation logic
+├── configs/                    # ⚙️ Configuration Files
+│   ├── score.yaml              #   Pillar weights, bands, thresholds
+│   ├── sector_map.yaml         #   Sector mapping & groups
+│   ├── freshness.yaml          #   Data freshness requirements
+│   ├── data_sources.yaml       #   Data vendor configuration
+│   └── barriers.yaml           #   Market barrier definitions
+├── data/                       # 📈 Sample Data
+│   ├── prices.csv              #   Historical price data
+│   ├── fundamentals.csv        #   Financial statement data
+│   ├── ownership.csv           #   Institutional holdings
+│   └── sector_map.csv          #   Sector classifications
+├── tests/                      # 🧪 Test Suite (>80% Coverage)
+│   ├── conftest.py             #   Test configuration
+│   ├── fixtures/               #   Test data & golden examples
+│   ├── unit/                   #   Unit tests (individual modules)
+│   ├── integration/            #   Integration tests (full pipeline)
+│   ├── validation/             #   Validation tests (business rules)
+│   ├── api/                    #   API endpoint tests
+│   └── performance/            #   Performance & load tests
+├── docs/                       # 📚 Documentation (CP7)
+│   ├── architecture.md         #   System architecture overview
+│   ├── api_reference.md        #   API documentation
+│   ├── configuration_guide.md  #   Configuration management
+│   ├── runbook.md             #   Operations runbook
+│   ├── DEPLOYMENT.md          #   Production deployment guide
+│   ├── API_USAGE.md           #   Comprehensive API usage
+│   └── DB_MIGRATIONS.md       #   Database migration procedures
+├── scripts/                    # 🔨 Utility Scripts
+│   ├── generate_sample_data.py #   Sample data generation
+│   ├── run_scoring.py          #   Scoring execution
+│   ├── validate_config.py      #   Configuration validation
+│   └── init_db.py              #   Database initialization
+├── alembic/                    # 🗃️ Database Migrations (CP7)
+│   ├── versions/               #   Migration files
+│   ├── env.py                  #   Alembic environment
+│   └── script.py.mako          #   Migration template
+├── .env.example               # 🔐 Environment template
+├── alembic.ini                # ⚙️ Alembic configuration
+├── docker-compose.yml         # 🐳 Container orchestration
+├── Dockerfile                 # 📦 Container definition
+├── requirements.txt           # 📋 Python dependencies
+├── requirements-dev.txt       # 🔧 Development dependencies
+├── pytest.ini                # 🧪 Test configuration
+├── logging.conf              # 📝 Logging configuration
+├── Makefile                  # 🛠️ Development commands
+└── README.md                 # 📖 This file
+```
+
+### Technology Stack
+
+| Component | Technology | Version | Purpose |
+|-----------|------------|---------|---------|
+| **Runtime** | Python | 3.10+ | Core application language |
+| **API Framework** | FastAPI | 0.104+ | REST API with automatic docs |
+| **Database** | PostgreSQL | 15+ | Time-series score storage |
+| **Validation** | Pydantic | 2.12+ | Data validation & serialization |
+| **Data Processing** | Pandas/NumPy | Latest | Numerical computations |
+| **Statistics** | SciPy | Latest | Statistical functions |
+| **Configuration** | PyYAML | Latest | YAML configuration files |
+| **Testing** | Pytest | Latest | Test framework with coverage |
+| **Migration** | Alembic | 1.13+ | Database schema management |
+| **Security** | SlowAPI | 0.1.9+ | Rate limiting middleware |
+| **Containers** | Docker | 20.10+ | Application containerization |
+| **Orchestration** | Docker Compose | 2.0+ | Multi-service deployment |
 
 ---
 
