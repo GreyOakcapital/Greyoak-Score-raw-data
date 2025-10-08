@@ -80,7 +80,11 @@ class BasePillar(ABC):
             raise ValueError("Empty sector_map DataFrame")
         
         # Check required columns
-        required_price_cols = ["ticker", "close", "trading_date"]
+        required_price_cols = ["ticker", "close"]
+        # Check for either 'date' or 'trading_date'
+        if 'date' not in prices_df.columns and 'trading_date' not in prices_df.columns:
+            required_price_cols.append('date_or_trading_date')
+        
         missing_cols = [col for col in required_price_cols if col not in prices_df.columns]
         if missing_cols:
             raise ValueError(f"Missing required price columns: {missing_cols}")
