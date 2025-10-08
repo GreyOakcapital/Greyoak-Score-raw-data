@@ -64,7 +64,7 @@ def load_prices_csv(filepath: Path) -> pd.DataFrame:
     try:
         first_row = df.iloc[0].to_dict()
         DailyPriceData(**first_row)
-        logger.info(f"  ✅ Schema validated")
+        logger.info("  ✅ Schema validated")
     except Exception as e:
         logger.warning(f"  ⚠️  Schema validation warning: {e}")
     
@@ -119,7 +119,7 @@ def load_fundamentals_csv(filepath: Path) -> pd.DataFrame:
     try:
         first_row = df.iloc[0].to_dict()
         FundamentalsData(**first_row)
-        logger.info(f"  ✅ Schema validated")
+        logger.info("  ✅ Schema validated")
     except Exception as e:
         logger.warning(f"  ⚠️  Schema validation warning: {e}")
     
@@ -157,7 +157,7 @@ def load_ownership_csv(filepath: Path) -> pd.DataFrame:
     try:
         first_row = df.iloc[0].to_dict()
         OwnershipData(**first_row)
-        logger.info(f"  ✅ Schema validated")
+        logger.info("  ✅ Schema validated")
     except Exception as e:
         logger.warning(f"  ⚠️  Schema validation warning: {e}")
     
@@ -192,7 +192,7 @@ def load_sector_map_csv(filepath: Path) -> pd.DataFrame:
     try:
         first_row = df.iloc[0].to_dict()
         SectorMapping(**first_row)
-        logger.info(f"  ✅ Schema validated")
+        logger.info("  ✅ Schema validated")
     except Exception as e:
         logger.warning(f"  ⚠️  Schema validation warning: {e}")
     
