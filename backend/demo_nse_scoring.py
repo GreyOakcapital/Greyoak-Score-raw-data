@@ -413,13 +413,29 @@ def run_nse_scoring_demo():
                     # Get stock data for this ticker
                     ticker_data = stock_data[stock_data['ticker'] == ticker].iloc[0].to_dict()
                     
-                    # Calculate pillar scores (simplified for demo)
-                    pillar_scores = calculate_demo_pillar_scores(ticker_data, mode)
-                    
-                    # Create a simplified score result for demo
-                    score_result = create_demo_score_result(
-                        ticker, scoring_date, mode, pillar_scores, ticker_data, config_manager
-                    )
+                    try:
+                        # Calculate pillar scores (simplified for demo)
+                        pillar_scores = calculate_demo_pillar_scores(ticker_data, mode)
+                        
+                        # Create a simplified score result for demo
+                        score_result = create_demo_score_result(
+                            ticker, scoring_date, mode, pillar_scores, ticker_data, config_manager
+                        )
+                        
+                        if score_result:
+                            # Add some additional metrics for analysis
+                            result = score_result.copy()  # It's already a dict
+                            result['market_cap'] = ticker_data['market_cap']
+                            result['sector'] = ticker_data['sector']
+                            result['pe_ratio'] = ticker_data['pe_ratio']
+                            result['roe'] = ticker_data['roe']
+                            mode_results.append(result)
+                            
+                    except Exception as e:
+                        # Debug the first few errors
+                        if len(mode_results) == 0:
+                            print(f"   Debug - First error for {ticker}: {e}")
+                        continue
                     
                     if score_result:
                         # Add some additional metrics for analysis
