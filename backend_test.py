@@ -17,9 +17,9 @@ backend_path = Path(__file__).parent / "backend"
 sys.path.insert(0, str(backend_path))
 
 try:
-    from greyoak_score.core.risk_penalty import RiskPenaltyCalculator
-    from greyoak_score.core.guardrails import GuardrailsEngine
-    from greyoak_score.core.scoring import ScoringEngine
+    from greyoak_score.core.risk_penalty import calculate_risk_penalty
+    from greyoak_score.core.guardrails import apply_guardrails
+    from greyoak_score.core.scoring import calculate_greyoak_score
     from greyoak_score.core.config_manager import ConfigManager
     from greyoak_score.data.models import ScoreOutput
 except ImportError as e:
