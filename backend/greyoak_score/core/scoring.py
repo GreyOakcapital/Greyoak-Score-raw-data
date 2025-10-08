@@ -292,71 +292,7 @@ def _calculate_data_quality_metrics(
     return confidence, imputed_fraction
 
 
-def score_multiple_stocks(
-    tickers: list,
-    all_data: Dict[str, Any],
-    sector_groups: Dict[str, str],
-    mode: Literal["trader", "investor"],
-    config: ConfigManager,
-    scoring_date: Optional[datetime] = None
-) -> Dict[str, ScoreOutput]:
-    """
-    Score multiple stocks efficiently with shared sector/market data.
-    
-    Args:
-        tickers: List of ticker symbols to score
-        all_data: Dict with keys 'prices', 'fundamentals', 'ownership', 'sector', 'market'
-        sector_groups: Dict mapping ticker to sector group
-        mode: Trading mode for all stocks
-        config: Configuration manager
-        scoring_date: Scoring date (defaults to current UTC)
-        
-    Returns:
-        Dict mapping ticker to ScoreOutput
-    """
-    if scoring_date is None:
-        scoring_date = datetime.now(timezone.utc)
-    
-    logger.info(f"Scoring {len(tickers)} stocks in {mode} mode")
-    
-    results = {}
-    
-    for ticker in tickers:
-        try:
-            # Extract data for this ticker
-            prices_data = all_data['prices'].loc[ticker] if ticker in all_data['prices'].index else pd.Series()
-            fundamentals_data = all_data['fundamentals'].loc[ticker] if ticker in all_data['fundamentals'].index else pd.Series()
-            ownership_data = all_data['ownership'].loc[ticker] if ticker in all_data['ownership'].index else pd.Series()
-            
-            sector_group = sector_groups.get(ticker, 'diversified')
-            
-            # Score the stock
-            score_output = calculate_greyoak_score(
-                ticker=ticker,
-                prices_data=prices_data,
-                fundamentals_data=fundamentals_data,
-                ownership_data=ownership_data,
-                sector_data=all_data['sector'],
-                market_data=all_data['market'],
-                sector_group=sector_group,
-                mode=mode,
-                config=config,
-                scoring_date=scoring_date
-            )
-            
-            results[ticker] = score_output
-            
-        except Exception as e:
-            logger.error(f"Failed to score {ticker}: {str(e)}", extra={
-                'ticker': ticker,
-                'error': str(e)
-            })
-            # Continue with other stocks
-            continue
-    
-    logger.info(f"Successfully scored {len(results)}/{len(tickers)} stocks")
-    
-    return results
+# score_multiple_stocks function removed for simplicity
 
 
 def get_score_explanation(score_output: ScoreOutput) -> Dict[str, str]:
