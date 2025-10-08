@@ -146,7 +146,7 @@ class ScoreDatabase:
         if not (0 <= score.score <= 100):
             raise ValueError(f"Score must be between 0-100, got {score.score}")
         
-        logger.debug(f"Saving score for {score.ticker} on {score.date} ({score.mode})")
+        logger.debug(f"Saving score for {score.ticker} on {score.scoring_date} ({score.mode})")
         
         try:
             with self.get_connection() as conn:
