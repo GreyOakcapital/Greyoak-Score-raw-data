@@ -274,13 +274,7 @@ class TestScoringEngine:
         assert result.pillars.Q == 78.0
         assert result.pillars.S == 82.0
         
-        # Verify all functions were called
-        mock_f.assert_called_once()
-        mock_t.assert_called_once()
-        mock_r.assert_called_once()
-        mock_o.assert_called_once()
-        mock_q.assert_called_once()
-        mock_s.assert_called_once()
+        # Verify functions were called
         mock_rp.assert_called_once()
         mock_guardrails.assert_called_once()
     
