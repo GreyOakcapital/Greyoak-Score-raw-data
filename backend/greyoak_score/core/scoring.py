@@ -80,6 +80,13 @@ def calculate_greyoak_score(
         'scoring_date': scoring_date.isoformat()
     })
     
+    # Get sector group from mapping
+    if ticker in sector_map_df.index:
+        sector_group = sector_map_df.loc[ticker, 'sector_group']
+    else:
+        # Fallback if not in mapping
+        sector_group = 'diversified'
+    
     # Validate inputs
     _validate_inputs(ticker, prices_data, fundamentals_data, ownership_data, sector_group, mode)
     
