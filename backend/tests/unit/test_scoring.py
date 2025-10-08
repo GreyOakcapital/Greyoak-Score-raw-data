@@ -393,7 +393,7 @@ class TestUtilityFunctions:
         
         # Check explanation components
         assert "pillars" in explanation
-        assert "Fundamentals: 75/100" in explanation["pillars"]
+        assert "Fundamentals: 75.0/100" in explanation["pillars"]
         assert "risk_penalty" in explanation
         assert "Risk penalty of 8.0 points applied" in explanation["risk_penalty"]
         assert "guardrails" in explanation
