@@ -168,18 +168,24 @@ def _get_mtv_cr(prices_data: pd.Series) -> float:
 
 
 def _is_illiquid(mtv_cr: float, mode: str, config: ConfigManager) -> bool:
-    """Check if stock is illiquid based on mode-specific MTV thresholds."""
+    """Check if stock is illiquid based on mode-specific MTV thresholds.
+    
+    Illiquidity guardrail triggers only for severely illiquid stocks
+    (highest penalty tier), not for moderately illiquid stocks.
+    """
     if pd.isna(mtv_cr) or mtv_cr < 0:
         return True  # No/invalid MTV data is illiquid
     
     # Get liquidity penalty bins
     liquidity_bins = config.get_liquidity_penalties(mode)
     
-    # The bins represent threshold ranges. If MTV falls into a bin with penalty > 0, it's illiquid
-    # Find the lowest threshold that triggers a penalty
+    # Find the highest penalty (most severe illiquidity)
+    max_penalty = max(bin_config["penalty"] for bin_config in liquidity_bins)
+    
+    # Check if MTV falls into the highest penalty bin
     for bin_config in sorted(liquidity_bins, key=lambda x: x["threshold"], reverse=True):
         if mtv_cr >= bin_config["threshold"]:
-            return bin_config["penalty"] > 0
+            return bin_config["penalty"] == max_penalty
     
     # If no threshold matches, assume highest penalty (most illiquid)
     return True
