@@ -32,9 +32,6 @@ class CP5BackendTester:
     
     def __init__(self):
         self.config = ConfigManager()
-        self.risk_penalty_calc = RiskPenaltyCalculator(self.config)
-        self.guardrails_engine = GuardrailsEngine(self.config)
-        self.scoring_engine = ScoringEngine(self.config)
         self.test_results = []
         
     def log_test(self, test_name, passed, details=""):
