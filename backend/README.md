@@ -41,52 +41,75 @@ GreyOak Score Engine is a **production-ready, deterministic stock scoring system
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- Python 3.10+
-- Make (optional, for convenience commands)
+**System Requirements:**
+- **Docker & Docker Compose**: 20.10+ and 2.0+
+- **Python**: 3.10+ (for local development)
+- **Memory**: 2GB RAM minimum (4GB recommended)
+- **Storage**: 10GB available space
 
-### Setup
+### Production Deployment
+
+```bash
+# 1. Clone repository and navigate to backend
+git clone <repository-url> && cd greyoak-score-engine/backend
+
+# 2. Configure production environment
+cp .env.example .env.production
+# Edit .env.production with your settings (CORS_ORIGINS, database credentials, etc.)
+
+# 3. Deploy with Docker Compose
+docker-compose --env-file .env.production up -d
+
+# 4. Apply database migrations
+docker-compose exec api alembic upgrade head
+
+# 5. Verify deployment
+curl -f http://localhost:8000/health
+curl -f http://localhost:8000/api/v1/health
+```
+
+### Development Setup
 
 ```bash
 # 1. Install dependencies and pre-commit hooks
 make setup
 
-# 2. Start services (API + PostgreSQL + Adminer)
-make run
+# 2. Start development services (with Adminer)
+docker-compose --profile dev up -d
 
-# Or run in background:
-make run-bg
+# 3. Run tests with coverage
+make test
 ```
 
 ### Access Services
 
-- **API**: http://localhost:8000
-- **API Docs (Swagger)**: http://localhost:8000/docs
-- **Adminer (DB UI)**: http://localhost:8080
-  - System: PostgreSQL
-  - Server: `db`
-  - Username: `greyoak`
-  - Password: `greyoak_pw`
-  - Database: `greyoak_scores`
+| Service | URL | Description |
+|---------|-----|-------------|
+| **API** | http://localhost:8000 | Main scoring API |
+| **API Docs** | http://localhost:8000/docs | Interactive Swagger UI |
+| **ReDoc** | http://localhost:8000/redoc | Clean API documentation |
+| **Health Check** | http://localhost:8000/health | Infrastructure health |
+| **App Health** | http://localhost:8000/api/v1/health | Application health |
+| **Adminer** | http://localhost:8080 | Database UI (dev only) |
 
-### Run Tests
+### Quick API Test
 
 ```bash
-# Run all tests with coverage
-make test
+# Test API health
+curl -s http://localhost:8000/api/v1/health | jq .
 
-# Run linters (black, ruff, mypy)
-make lint
-
-# Format code
-make fmt
-
-# Validate configuration files
-make validate-config
+# Calculate a score (example with mock data)
+curl -X POST "http://localhost:8000/api/v1/calculate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ticker": "RELIANCE.NS",
+    "date": "2024-10-08",
+    "mode": "Investor"
+  }' | jq .
 ```
 
 ---
