@@ -493,33 +493,78 @@ All API responses include consistent metadata:
 
 ---
 
-## Database Schema
+## 🗄️ Database Schema & Management (CP7)
 
-### `scores` Table
+### Database Architecture
+
+- **Database**: PostgreSQL 15+ with performance optimizations
+- **Connection Pool**: ThreadedConnectionPool (2-20 connections with retry logic)
+- **Migration Management**: Alembic for schema versioning and deployment
+- **Backup Strategy**: Automated daily backups with point-in-time recovery
+
+### Primary Table: `scores`
 
 ```sql
 CREATE TABLE scores (
-    id SERIAL PRIMARY KEY,
-    ticker VARCHAR(20),
-    date DATE,
-    mode VARCHAR(10),
-    score NUMERIC(5,2),
-    band VARCHAR(20),
-    f_pillar NUMERIC(5,2),
-    t_pillar NUMERIC(5,2),
-    r_pillar NUMERIC(5,2),
-    o_pillar NUMERIC(5,2),
-    q_pillar NUMERIC(5,2),
-    s_pillar NUMERIC(5,2),
-    risk_penalty NUMERIC(5,2),
-    guardrail_flags JSONB,
-    confidence NUMERIC(4,3),
-    s_z NUMERIC(6,3),  -- Sector momentum z-score
-    as_of TIMESTAMP WITH TIME ZONE,
-    config_hash VARCHAR(64),
-    UNIQUE(ticker, date, mode)
+    ticker VARCHAR(20) NOT NULL,
+    scoring_date TIMESTAMP NOT NULL,
+    mode VARCHAR(20) NOT NULL,
+    f_score FLOAT,
+    t_score FLOAT,
+    r_score FLOAT,
+    o_score FLOAT,
+    q_score FLOAT,
+    s_score FLOAT,
+    weighted_score FLOAT,
+    risk_penalty FLOAT,
+    final_score FLOAT,
+    band ENUM('Strong Buy', 'Buy', 'Hold', 'Avoid'),
+    guardrails VARCHAR(500),
+    as_of TIMESTAMP,
+    f_z FLOAT,
+    t_z FLOAT,
+    r_z FLOAT,
+    o_z FLOAT,
+    q_z FLOAT,
+    s_z FLOAT,  -- Critical: Column name is s_z (not sector_z)
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    PRIMARY KEY (ticker, scoring_date, mode)
 );
+
+-- Performance indexes
+CREATE INDEX idx_scores_ticker ON scores(ticker);
+CREATE INDEX idx_scores_band ON scores(band);
+CREATE INDEX idx_scores_scoring_date ON scores(scoring_date);
+CREATE INDEX idx_scores_mode ON scores(mode);
 ```
+
+### Database Operations
+
+```bash
+# Apply migrations
+docker-compose exec api alembic upgrade head
+
+# Check migration status
+docker-compose exec api alembic current
+
+# Create new migration
+docker-compose exec api alembic revision -m "Description"
+
+# Database backup
+docker-compose exec db pg_dump -U greyoak greyoak_scores > backup.sql
+
+# Database restore
+cat backup.sql | docker-compose exec -T db psql -U greyoak greyoak_scores
+```
+
+### Connection Pool Management (CP7)
+
+- **Minimum Connections**: 2 (always available)
+- **Maximum Connections**: 20 (configurable via `DB_POOL_MAX_CONN`)
+- **Retry Logic**: Exponential backoff with 3 retry attempts
+- **Health Monitoring**: Pool statistics available via health endpoints
+- **Graceful Degradation**: API continues in degraded mode if database unavailable
 
 ---
 
