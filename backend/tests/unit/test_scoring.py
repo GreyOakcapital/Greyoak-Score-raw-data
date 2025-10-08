@@ -326,52 +326,46 @@ class TestScoringEngine:
                 
                 assert result.as_of == custom_date
     
-    def test_calculate_greyoak_score_weight_application(
-        self, config_manager, sample_prices_data, sample_fundamentals_data,
-        sample_ownership_data, sample_sector_data, sample_market_data
-    ):
+    def test_calculate_greyoak_score_weight_application(self, config_manager, sample_prices_data,
+                                                       sample_fundamentals_data, sample_ownership_data):
         """Test that pillar weights are correctly applied."""
-        with patch('greyoak_score.core.scoring.calculate_fundamentals_pillar', return_value=60.0):
-            with patch('greyoak_score.core.scoring.calculate_technicals_pillar', return_value=70.0):
-                with patch('greyoak_score.core.scoring.calculate_relative_strength_pillar', return_value=80.0):
-                    with patch('greyoak_score.core.scoring.calculate_ownership_pillar', return_value=50.0):
-                        with patch('greyoak_score.core.scoring.calculate_quality_pillar', return_value=90.0):
-                            with patch('greyoak_score.core.scoring.calculate_sector_momentum_pillar', return_value=(75.0, 1.0)):
-                                with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(0.0, {})):
-                                    with patch('greyoak_score.core.scoring.apply_guardrails') as mock_guardrails:
-                                        
-                                        # Mock guardrails to return the input score unchanged
-                                        def mock_guardrails_func(score_pre_guard, **kwargs):
-                                            return score_pre_guard, "Buy", []
-                                        mock_guardrails.side_effect = mock_guardrails_func
-                                        
-                                        result = calculate_greyoak_score(
-                                            ticker="TESTSTOCK",
-                                            prices_data=sample_prices_data,
-                                            fundamentals_data=sample_fundamentals_data,
-                                            ownership_data=sample_ownership_data,
-                                            sector_data=sample_sector_data,
-                                            market_data=sample_market_data,
-                                            sector_group="it",
-                                            mode="trader",
-                                            config=config_manager
-                                        )
-                                        
-                                        # Get IT trader weights from config
-                                        weights = config_manager.get_pillar_weights("it", "trader")
-                                        
-                                        # Calculate expected weighted score
-                                        expected_score = (
-                                            60.0 * weights['F'] +
-                                            70.0 * weights['T'] +
-                                            80.0 * weights['R'] +
-                                            50.0 * weights['O'] +
-                                            90.0 * weights['Q'] +
-                                            75.0 * weights['S']
-                                        )
-                                        
-                                        # Score should match weighted calculation (no RP, no guardrail changes)
-                                        assert abs(result.score - expected_score) < 0.01
+        with patch('greyoak_score.core.scoring.calculate_risk_penalty', return_value=(0.0, {})):
+            with patch('greyoak_score.core.scoring.apply_guardrails') as mock_guardrails:
+                
+                # Mock guardrails to return the input score unchanged
+                def mock_guardrails_func(score_pre_guard, **kwargs):
+                    return score_pre_guard, "Buy", []
+                mock_guardrails.side_effect = mock_guardrails_func
+                
+                pillar_scores = {'F': 60.0, 'T': 70.0, 'R': 80.0, 'O': 50.0, 'Q': 90.0, 'S': 75.0}
+                
+                result = calculate_greyoak_score(
+                    ticker="TESTSTOCK",
+                    pillar_scores=pillar_scores,
+                    prices_data=sample_prices_data,
+                    fundamentals_data=sample_fundamentals_data,
+                    ownership_data=sample_ownership_data,
+                    sector_group="it",
+                    mode="trader",
+                    config=config_manager,
+                    s_z=1.0
+                )
+                
+                # Get IT trader weights from config
+                weights = config_manager.get_pillar_weights("it", "trader")
+                
+                # Calculate expected weighted score
+                expected_score = (
+                    60.0 * weights['F'] +
+                    70.0 * weights['T'] +
+                    80.0 * weights['R'] +
+                    50.0 * weights['O'] +
+                    90.0 * weights['Q'] +
+                    75.0 * weights['S']
+                )
+                
+                # Score should match weighted calculation (no RP, no guardrail changes)
+                assert abs(result.score - expected_score) < 0.01
 
 
 class TestMultipleStockScoring:
