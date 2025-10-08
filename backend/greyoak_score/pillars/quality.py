@@ -154,7 +154,7 @@ class QualityPillar(BasePillar):
         Returns:
             Dict with metric names and fraction of missing values
         """
-        quality_metrics = ['roce_3y', 'omp_stdev_12q']
+        quality_metrics = ['roce_3y', 'opm_stdev_12q']
         missing_summary = {}
         
         for metric in quality_metrics:
