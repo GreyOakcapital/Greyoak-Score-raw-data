@@ -532,7 +532,7 @@ async def health_check_detailed():
         db_error = None
         
         try:
-            if db.test_connection():
+            if get_db_instance().test_connection():
                 db_status = "healthy"
             else:
                 db_status = "unhealthy"
