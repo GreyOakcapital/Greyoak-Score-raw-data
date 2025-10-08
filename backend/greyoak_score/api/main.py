@@ -208,26 +208,78 @@ def setup_security_middleware():
 setup_security_middleware()
 
 
-# Global exception handler
+# Enhanced exception handlers (CP7)
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """
+    Handle Pydantic validation errors with detailed field information.
+    """
+    request_id = f"req_{int(time.time() * 1000000)}"  # Microsecond timestamp
+    
+    logger.warning(f"Validation error [{request_id}]: {exc}", extra={
+        'method': request.method,
+        'url': str(request.url),
+        'client': request.client.host if request.client else 'unknown',
+        'request_id': request_id
+    })
+    
+    return JSONResponse(
+        status_code=422,
+        content={
+            "error": "Validation Error",
+            "message": "The request data is invalid. Please check the required fields and formats.",
+            "details": exc.errors(),
+            "request_id": request_id
+        }
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """
+    Handle HTTP exceptions with consistent response format.
+    """
+    request_id = f"req_{int(time.time() * 1000000)}"
+    
+    logger.warning(f"HTTP exception [{request_id}]: {exc.status_code} - {exc.detail}", extra={
+        'method': request.method,
+        'url': str(request.url),
+        'client': request.client.host if request.client else 'unknown',
+        'status_code': exc.status_code,
+        'request_id': request_id
+    })
+    
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": f"HTTP {exc.status_code}",
+            "message": exc.detail,
+            "request_id": request_id
+        }
+    )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """
-    Global exception handler to catch unhandled exceptions.
-    
-    Logs the full exception details and returns a user-friendly error response.
+    Global exception handler for unhandled exceptions with enhanced logging.
     """
-    logger.error(f"Unhandled exception: {exc}", exc_info=True, extra={
+    request_id = f"req_{int(time.time() * 1000000)}"
+    
+    logger.error(f"Unhandled exception [{request_id}]: {exc}", exc_info=True, extra={
         'method': request.method,
         'url': str(request.url),
-        'client': request.client.host if request.client else 'unknown'
+        'client': request.client.host if request.client else 'unknown',
+        'request_id': request_id,
+        'exception_type': type(exc).__name__
     })
     
     return JSONResponse(
         status_code=500,
         content={
-            "error": "Internal server error",
-            "message": "An unexpected error occurred. Please try again later.",
-            "request_id": id(request)  # Simple request ID for debugging
+            "error": "Internal Server Error",
+            "message": "An unexpected error occurred. Please try again later or contact support.",
+            "request_id": request_id
         }
     )
 
