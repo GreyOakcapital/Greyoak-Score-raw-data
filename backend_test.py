@@ -7,31 +7,16 @@ Tests Risk Penalty Calculator, Guardrails Engine, and Final Scoring Engine
 import sys
 import os
 import subprocess
-import pandas as pd
-import numpy as np
-from datetime import datetime, date
 from pathlib import Path
 
 # Add backend to path
 backend_path = Path(__file__).parent / "backend"
 sys.path.insert(0, str(backend_path))
 
-try:
-    from greyoak_score.core.risk_penalty import calculate_risk_penalty
-    from greyoak_score.core.guardrails import apply_guardrails
-    from greyoak_score.core.scoring import calculate_greyoak_score
-    from greyoak_score.core.config_manager import ConfigManager
-    from greyoak_score.data.models import ScoreOutput
-except ImportError as e:
-    print(f"❌ Import Error: {e}")
-    print("Make sure you're running from the correct directory and all dependencies are installed")
-    sys.exit(1)
-
 class CP5BackendTester:
     """Comprehensive tester for CP5 modules"""
     
     def __init__(self):
-        self.config = ConfigManager()
         self.test_results = []
         
     def log_test(self, test_name, passed, details=""):
