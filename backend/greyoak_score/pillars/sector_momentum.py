@@ -62,8 +62,7 @@ class SectorMomentumPillar(BasePillar):
         self._validate_sector_momentum_data(prices_df)
         
         # Get configuration
-        config = self.config.get_sector_momentum_config()
-        horizon_weights = config["horizon_weights"]
+        horizon_weights = self.config.get_sector_momentum_config()  # Returns horizon_weights directly
         
         # Get latest price data per ticker
         latest_prices = self.get_latest_data_by_ticker(prices_df)
