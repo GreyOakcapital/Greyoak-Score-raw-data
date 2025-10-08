@@ -487,9 +487,15 @@ async def get_stocks_by_band(
 @router.get(
     "/health",
     response_model=HealthResponse,
-    summary="Health Check",
+    summary="Application Health Check (CP7)",
     description="""
-    Comprehensive health check including database connectivity.
+    Comprehensive application health check including database connectivity and connection pool status.
+    
+    **CP7 Features:**
+    - Database connection pool monitoring
+    - Connection retry validation
+    - Enhanced error reporting
+    - Performance metrics
     
     **Status Levels:**
     - `healthy`: All systems operational
@@ -497,11 +503,14 @@ async def get_stocks_by_band(
     - `unhealthy`: Critical system failures
     
     **Use Cases:**
-    - Load balancer health checks
-    - Monitoring and alerting
-    - Service deployment verification
+    - Application health monitoring
+    - Database connectivity verification
+    - Connection pool status monitoring
+    
+    **Note:** This is the application health endpoint. For infrastructure-only health checks (faster), use `GET /health`.
     """
 )
+@limiter.exempt  # Health checks should not be rate limited
 async def health_check_detailed():
     """Detailed health check with database connectivity test."""
     try:
