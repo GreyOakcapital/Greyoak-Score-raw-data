@@ -131,8 +131,9 @@ class TestOwnershipPillar:
             (0.025, 2.5),   # Midway between 0% and 5%
             (0.075, 7.5),   # Midway between 5% and 10%
             (0.15, 15.0),   # Midway between 10% and 20%
-            (0.60, 30.0),   # Beyond curve - use last penalty
-            (1.50, 30.0),   # Way beyond curve
+            (0.60, 25.0),   # Interpolation: 20 + (30-20) * (0.6-0.2)/(1.0-0.2) = 25
+            (1.00, 30.0),   # Exactly at last curve point
+            (1.50, 30.0),   # Way beyond curve - use last penalty
         ]
         
         for pledge_frac, expected_penalty in test_cases:
