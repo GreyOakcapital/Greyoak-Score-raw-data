@@ -167,10 +167,11 @@ class TestVolatility:
         
         volatility = calculate_volatility(prices, period=5)
         
-        # Volatility should be non-negative
-        assert (volatility >= 0).all()
+        # Volatility should be non-negative (excluding NaN values)
+        valid_volatility = volatility.dropna()
+        assert (valid_volatility >= 0).all()
         
-        # Should have NaN for first few values
+        # Should have NaN for first few values (warmup period)
         assert pd.isna(volatility.iloc[0])
         
         # Should have valid values after warmup
