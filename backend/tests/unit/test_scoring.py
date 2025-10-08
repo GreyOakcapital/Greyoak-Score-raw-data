@@ -12,7 +12,6 @@ from greyoak_score.core.scoring import (
     calculate_greyoak_score,
     _validate_inputs,
     _calculate_data_quality_metrics,
-    score_multiple_stocks,
     get_score_explanation,
     compare_scores
 )
