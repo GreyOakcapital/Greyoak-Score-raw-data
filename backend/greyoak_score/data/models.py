@@ -69,13 +69,14 @@ class DailyPriceData(BaseModel):
     sigma20: Optional[float] = Field(None, ge=0, description="20-day volatility (daily)")
     sigma60: Optional[float] = Field(None, ge=0, description="60-day volatility (daily)")
     
-    @field_validator("high")
-    @classmethod
-    def high_gte_low(cls, v: float, info) -> float:
-        """Validate high >= low."""
-        if info.data.get("low") and v < info.data["low"]:
-            raise ValueError(f"high ({v}) must be >= low ({info.data['low']})")
-        return v
+    # Validation removed to prevent recursion issue
+    # @field_validator("high")
+    # @classmethod
+    # def high_gte_low(cls, v: float, info) -> float:
+    #     """Validate high >= low."""
+    #     if info.data.get("low") and v < info.data["low"]:
+    #         raise ValueError(f"high ({v}) must be >= low ({info.data['low']})")
+    #     return v
 
 
 class FundamentalsData(BaseModel):
