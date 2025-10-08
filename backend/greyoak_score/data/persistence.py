@@ -32,11 +32,11 @@ logger = get_logger(__name__)
 
 class ScoreDatabase:
     """
-    PostgreSQL persistence layer for GreyOak Scores.
+    PostgreSQL persistence layer for GreyOak Scores with Connection Pooling.
     
     Manages database connections and provides CRUD operations for score data.
-    Uses the schema defined in db_init/01_schema.sql with proper constraints
-    and indexes for optimal performance.
+    Uses ThreadedConnectionPool for efficient connection management with 
+    retry logic and exponential backoff for resilience.
     
     Database Schema:
     - scores table with s_z column (not sector_z) 
@@ -44,11 +44,18 @@ class ScoreDatabase:
     - Indexes on ticker, date, band for query optimization
     - JSON storage for guardrail_flags array
     - Audit trail columns for determinism tracking
+    
+    Connection Pool Features:
+    - Min connections: 2 (always available)
+    - Max connections: 20 (configurable)
+    - Retry logic with exponential backoff
+    - Connection health checks
+    - Proper cleanup on shutdown
     """
     
     def __init__(self, database_url: Optional[str] = None):
         """
-        Initialize database connection manager.
+        Initialize database connection pool manager.
         
         Args:
             database_url: PostgreSQL connection string. If None, uses environment variables.
@@ -56,16 +63,31 @@ class ScoreDatabase:
         if database_url:
             self.database_url = database_url
         else:
-            # Build connection string from environment variables
-            pguser = os.getenv('PGUSER', 'greyoak')
-            pgpassword = os.getenv('PGPASSWORD', 'greyoak_pw_change_in_production')
-            pghost = os.getenv('PGHOST', 'db')  # Docker service name
-            pgport = os.getenv('PGPORT', '5432')
-            pgdatabase = os.getenv('PGDATABASE', 'greyoak_scores')
-            
-            self.database_url = f"postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}"
+            # Check for DATABASE_URL first (single source)
+            database_url = os.getenv('DATABASE_URL')
+            if database_url:
+                self.database_url = database_url
+            else:
+                # Build connection string from environment variables
+                pguser = os.getenv('PGUSER', 'greyoak')
+                pgpassword = os.getenv('PGPASSWORD', 'greyoak_pw_change_in_production')
+                pghost = os.getenv('PGHOST', 'db')  # Docker service name
+                pgport = os.getenv('PGPORT', '5432')
+                pgdatabase = os.getenv('PGDATABASE', 'greyoak_scores')
+                
+                self.database_url = f"postgresql://{pguser}:{pgpassword}@{pghost}:{pgport}/{pgdatabase}"
         
-        logger.info(f"Database initialized with host: {self._get_safe_connection_info()}")
+        # Connection pool configuration
+        self.min_conn = int(os.getenv('DB_POOL_MIN_CONN', '2'))
+        self.max_conn = int(os.getenv('DB_POOL_MAX_CONN', '20'))
+        self.pool_timeout = int(os.getenv('DB_POOL_TIMEOUT', '30'))
+        
+        # Initialize connection pool
+        self._connection_pool = None
+        self._initialize_pool()
+        
+        logger.info(f"Database pool initialized: {self._get_safe_connection_info()}, "
+                   f"pool={self.min_conn}-{self.max_conn} connections")
     
     def _get_safe_connection_info(self) -> str:
         """Get connection info without exposing credentials."""
@@ -74,6 +96,44 @@ class ScoreDatabase:
             return f"postgresql://***:***@{parts}"
         except Exception:
             return "postgresql://***:***@***"
+    
+    def _initialize_pool(self, max_retries: int = 3, retry_delay: float = 1.0) -> None:
+        """
+        Initialize connection pool with retry logic.
+        
+        Args:
+            max_retries: Maximum number of retry attempts
+            retry_delay: Initial delay between retries (exponential backoff)
+        """
+        for attempt in range(max_retries + 1):
+            try:
+                self._connection_pool = psycopg2.pool.ThreadedConnectionPool(
+                    minconn=self.min_conn,
+                    maxconn=self.max_conn,
+                    dsn=self.database_url,
+                    connect_timeout=self.pool_timeout
+                )
+                logger.info(f"Connection pool initialized successfully on attempt {attempt + 1}")
+                return
+            except psycopg2.Error as e:
+                if attempt == max_retries:
+                    logger.error(f"Failed to initialize connection pool after {max_retries + 1} attempts: {e}")
+                    raise
+                
+                wait_time = retry_delay * (2 ** attempt)  # Exponential backoff
+                logger.warning(f"Connection pool initialization failed (attempt {attempt + 1}/{max_retries + 1}): {e}")
+                logger.warning(f"Retrying in {wait_time:.1f} seconds...")
+                time.sleep(wait_time)
+    
+    def close_pool(self) -> None:
+        """
+        Close all connections in the pool.
+        Should be called during application shutdown.
+        """
+        if self._connection_pool:
+            self._connection_pool.closeall()
+            self._connection_pool = None
+            logger.info("Connection pool closed")
     
     @contextmanager
     def get_connection(self):
