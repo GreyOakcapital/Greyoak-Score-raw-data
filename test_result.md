@@ -201,6 +201,78 @@ backend:
         agent: "testing"
         comment: "Complete end-to-end flow tested: POST calculate → database save → GET retrieve. Score calculation with mocked data (Score: 69.88, Band: Hold), database UPSERT functionality, and data retrieval all working correctly. Production API fully operational with real database persistence."
 
+  - task: "CP7 CORS Security Implementation"
+    implemented: true
+    working: false
+    file: "/app/backend/greyoak_score/api/main.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: CORS middleware configured in code but headers not returned in responses. Environment variables CORS_ORIGINS may not be loaded properly. Tested with allowed origin 'https://greyoak-score-1.preview.emergentagent.com' but no access-control-allow-origin header returned. CORS preflight (OPTIONS) returns 405 Method Not Allowed."
+
+  - task: "CP7 Rate Limiting Implementation"
+    implemented: true
+    working: false
+    file: "/app/backend/greyoak_score/api/main.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL: Rate limiting middleware configured with slowapi but no rate limiting headers (x-ratelimit-limit, x-ratelimit-remaining) visible in responses. Health endpoint accessible without rate limiting (good), but API endpoints don't show rate limiting evidence. Environment variable RATE_LIMIT=60 may not be properly loaded."
+
+  - task: "CP7 Error Schema & Correlation IDs"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/api/main.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING: Error schema with correlation IDs functioning correctly. 422 validation errors return proper schema with request_id (e.g., req_1759943795038347), error details, and structured format. 404 errors also include request_id correlation. Exception handlers properly implemented."
+
+  - task: "CP7 Database Lazy Initialization"
+    implemented: true
+    working: true
+    file: "/app/backend/greyoak_score/data/persistence.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ WORKING: Database lazy initialization functioning correctly. API starts successfully even with PostgreSQL unavailable. /api/v1/health returns 'degraded' status with database 'unhealthy' and API 'healthy'. Connection pool retry logic working with detailed error reporting."
+
+  - task: "CP7 Health Endpoints"
+    implemented: true
+    working: false
+    file: "/app/backend/greyoak_score/api/main.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "MIXED: Application health endpoint /api/v1/health working correctly with component status (DB: unhealthy, API: healthy, Overall: degraded). However, infrastructure health endpoint /health returns frontend HTML instead of backend JSON due to routing misconfiguration. Backend has @app.get('/health') but infrastructure routes it to frontend."
+
+  - task: "CP7 Production Configuration"
+    implemented: true
+    working: false
+    file: "/app/backend/greyoak_score/api/main.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "MIXED: Backend API root endpoint / configured with security features documentation, but infrastructure routing serves frontend HTML instead of backend JSON. Environment variables (CORS_ORIGINS, TRUSTED_HOSTS, RATE_LIMIT) configured in .env but may not be properly loaded by application."
+
 metadata:
   created_by: "main_agent"
   version: "1.0"
