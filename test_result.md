@@ -196,12 +196,9 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Scoring Unit Tests"
-    - "RELIANCE Golden Test"
-    - "Complete Pipeline Integration"
+  current_focus: []
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "sequential"
 
 agent_communication:
