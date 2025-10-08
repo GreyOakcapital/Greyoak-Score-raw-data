@@ -184,7 +184,7 @@ class ScoreDatabase:
                         RETURNING id
                     """, (
                         score.ticker,
-                        score.date,
+                        score.scoring_date,
                         score.mode,
                         float(score.score),
                         score.band,
