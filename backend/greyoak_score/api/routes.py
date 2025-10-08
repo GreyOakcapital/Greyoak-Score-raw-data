@@ -121,7 +121,7 @@ async def calculate_score_endpoint(request: ScoreRequest):
             'sigma20': 0.025
         })
         
-        mock_fundamentals_data = Series({
+        mock_fundamentals_data = pd.Series({
             'market_cap_cr': 15000.0,
             'roe_3y': 0.15,
             'sales_cagr_3y': 0.12,
