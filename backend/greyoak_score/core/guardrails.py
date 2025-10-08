@@ -172,17 +172,17 @@ def _is_illiquid(mtv_cr: float, mode: str, config: ConfigManager) -> bool:
     if pd.isna(mtv_cr) or mtv_cr < 0:
         return True  # No/invalid MTV data is illiquid
     
-    # Get liquidity penalty bins and find the highest threshold with non-zero penalty
+    # Get liquidity penalty bins
     liquidity_bins = config.get_liquidity_penalties(mode)
     
-    # Find the highest threshold where penalty > 0
-    # This gives us the illiquidity threshold
-    illiquidity_threshold = 0.0
-    for bin_config in liquidity_bins:
-        if bin_config["penalty"] > 0 and bin_config["threshold"] > illiquidity_threshold:
-            illiquidity_threshold = bin_config["threshold"]
+    # The bins represent threshold ranges. If MTV falls into a bin with penalty > 0, it's illiquid
+    # Find the lowest threshold that triggers a penalty
+    for bin_config in sorted(liquidity_bins, key=lambda x: x["threshold"], reverse=True):
+        if mtv_cr >= bin_config["threshold"]:
+            return bin_config["penalty"] > 0
     
-    return mtv_cr < illiquidity_threshold
+    # If no threshold matches, assume highest penalty (most illiquid)
+    return True
 
 
 def _score_to_band(score: float, config: ConfigManager) -> str:
