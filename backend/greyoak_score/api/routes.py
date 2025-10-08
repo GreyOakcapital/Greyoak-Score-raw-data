@@ -152,7 +152,7 @@ async def calculate_score_endpoint(request: ScoreRequest):
             fundamentals_data=mock_fundamentals_data,
             ownership_data=mock_ownership_data,
             sector_group=sector_group,
-            mode=request.mode,
+            mode=request.mode.lower(),
             config=config,
             s_z=1.2,  # Mock sector momentum z-score
             scoring_date=datetime.combine(scoring_date, datetime.min.time().replace(tzinfo=timezone.utc))
