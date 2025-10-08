@@ -194,14 +194,15 @@ def _calculate_event_penalty(
     ticker: str,
     fundamentals_data: pd.Series,
     scoring_date: datetime,
-    config: Dict
+    config: ConfigManager
 ) -> float:
     """Calculate event window penalty (earnings/board meetings)."""
     # For this implementation, we'll use a simple heuristic
     # In production, would have actual earnings calendar data
     
-    event_config = config.get("event_window", {})
-    window_days = event_config.get("days", 2)
+    event_params = config.get_event_window_params()
+    window_days = event_params.get("days", 2)
+    penalty = event_params.get("penalty", 2.0)
     
     # Check if we have quarter_end date
     quarter_end = fundamentals_data.get('quarter_end')
@@ -221,7 +222,7 @@ def _calculate_event_penalty(
         days_to_earnings = (estimated_earnings_date.date() - scoring_date.date()).days
         
         if abs(days_to_earnings) <= window_days:
-            return 2.0
+            return float(penalty)
         else:
             return 0.0
     
