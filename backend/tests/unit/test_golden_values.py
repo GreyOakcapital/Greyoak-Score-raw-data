@@ -93,10 +93,10 @@ class TestGoldenValues:
 
     @pytest.fixture
     def golden_sector_map(self):
-        """Fixed sector mapping for golden tests."""
+        """Fixed sector mapping for golden tests with multiple sectors."""
         return pd.DataFrame({
-            'ticker': ['RELIANCE', 'TCS', 'HDFC'],
-            'sector_group': ['diversified', 'it', 'banks']
+            'ticker': ['RELIANCE', 'TCS', 'HDFC', 'INFY', 'AXIS'],
+            'sector_group': ['diversified', 'it', 'banks', 'it', 'banks']
         })
 
     @pytest.fixture
