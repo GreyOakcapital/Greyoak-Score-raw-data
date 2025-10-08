@@ -422,29 +422,74 @@ make fmt
 
 ---
 
-## API Endpoints
+## 🌐 API Reference (CP7)
 
-### `POST /score/run`
+### Production API Endpoints
 
-Trigger scoring for a specific date/mode.
+| Method | Endpoint | Purpose | Rate Limit |
+|--------|----------|---------|------------|
+| `POST` | `/api/v1/calculate` | Calculate GreyOak Score | 60/min |
+| `GET` | `/api/v1/scores/{ticker}` | Get score history | 60/min |
+| `GET` | `/api/v1/scores/band/{band}` | Get stocks by band | 60/min |
+| `GET` | `/api/v1/health` | Application health check | Unlimited |
+| `GET` | `/health` | Infrastructure health check | Unlimited |
+| `GET` | `/docs` | Interactive API documentation | Unlimited |
+| `GET` | `/redoc` | Clean API documentation | Unlimited |
 
-**Query Parameters:**
-- `date`: Trading date (YYYY-MM-DD)
-- `mode`: Scoring mode (`Trader` or `Investor`)
+### Security Features (CP7)
 
-### `GET /score/{ticker}/{date}/{mode}`
+- ✅ **Rate Limiting**: 60 requests/minute per IP with `X-RateLimit-*` headers
+- ✅ **CORS Protection**: Environment-configured origin restrictions  
+- ✅ **Request Correlation**: Unique `request_id` in all responses for tracking
+- ✅ **Input Validation**: Comprehensive Pydantic validation with detailed error messages
+- ✅ **Error Handling**: Standardized error schema across all endpoints
 
-Retrieve score for a specific stock.
+### Quick API Examples
 
-### `GET /score/{date}/{mode}`
+```bash
+# Calculate a score
+curl -X POST "http://localhost:8000/api/v1/calculate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ticker": "RELIANCE.NS",
+    "date": "2024-10-08", 
+    "mode": "Investor"
+  }'
 
-Retrieve all scores for a date/mode.
+# Get score history
+curl "http://localhost:8000/api/v1/scores/RELIANCE.NS?mode=Investor&limit=5"
 
-### `GET /health`
+# Get all "Buy" rated stocks
+curl "http://localhost:8000/api/v1/scores/band/Buy?date=2024-10-08&mode=Investor"
 
-System health check.
+# Check API health
+curl "http://localhost:8000/api/v1/health"
+```
 
-**Full API documentation**: http://localhost:8000/docs
+### Response Format
+
+All API responses include consistent metadata:
+
+```json
+{
+  "ticker": "RELIANCE.NS",
+  "date": "2024-10-08",
+  "mode": "Investor",
+  "score": 74.25,
+  "band": "Buy",
+  "pillars": {"F": 78.5, "T": 72.0, "R": 81.2, "O": 69.8, "Q": 76.4, "S": 70.1},
+  "risk_penalty": 3.75,
+  "guardrails": ["LowDataHold"],
+  "confidence": 85.2,
+  "as_of": "2024-10-08T10:30:00Z"
+}
+```
+
+### Interactive Documentation
+
+- **Swagger UI**: http://localhost:8000/docs (Interactive testing)
+- **ReDoc**: http://localhost:8000/redoc (Clean documentation)
+- **OpenAPI Schema**: http://localhost:8000/openapi.json (Machine-readable)
 
 ---
 
