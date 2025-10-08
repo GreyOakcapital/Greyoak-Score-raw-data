@@ -61,9 +61,12 @@ class TestDatabaseInitialization:
     
     def test_init_with_defaults(self):
         """Test initialization with default values when env vars are missing."""
-        # Clear relevant env vars
+        # Clear relevant env vars by removing them entirely
         env_vars = ['PGUSER', 'PGPASSWORD', 'PGHOST', 'PGPORT', 'PGDATABASE']
-        with patch.dict(os.environ, {var: '' for var in env_vars}, clear=True):
+        with patch.dict(os.environ, {}, clear=True):
+            # Ensure the env vars don't exist
+            for var in env_vars:
+                os.environ.pop(var, None)
             db = ScoreDatabase()
             expected_url = "postgresql://greyoak:greyoak_pw_change_in_production@db:5432/greyoak_scores"
             assert db.database_url == expected_url
