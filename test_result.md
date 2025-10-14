@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Implement CP7 - Production Readiness: Docker hardening, Alembic migrations, security enhancements, performance testing, and comprehensive documentation"
+user_problem_statement: "Run comprehensive 5-year historical validation test on GreyOak Score Engine to validate production readiness with real market data simulation"
 
 backend:
   - task: "PostgreSQL Persistence Layer"
