@@ -6,10 +6,10 @@ predictor_score:
   thresholds:
     DEFAULT:
       d20:
-        E_min: 0.015          # Minimum expected edge (1.5%)
-        RA_min: 0.45          # Minimum risk-adjusted edge
-        p_pos_min_sb: 0.90    # Strong Buy threshold
-        p_pos_min_buy: 0.75   # Buy threshold
+        E_min: 0.010          # Minimum expected edge (1.0%)
+        RA_min: 0.35          # Minimum risk-adjusted edge
+        p_pos_min_sb: 0.86    # Strong Buy threshold
+        p_pos_min_buy: 0.70   # Buy threshold
         p_neg_min_avoid: 0.45 # Avoid threshold
 
 coverage_caps:
@@ -17,7 +17,7 @@ coverage_caps:
   buy_max: 0.35         # Max 35% of universe in Buy
 
 barriers:
-  k_static: 1.8   # U = L = k_static * ATR14/price
+  k_static: 1.5   # U = L = k_static * ATR14/price
   time_h: 20      # Horizon in trading days
 
 model:
