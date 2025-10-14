@@ -317,17 +317,11 @@ metadata:
 
 test_plan:
   current_focus: 
-    - "CP7 CORS Security Implementation"
-    - "CP7 Rate Limiting Implementation" 
-    - "CP7 Health Endpoints"
-    - "CP7 Production Configuration"
-  stuck_tasks:
-    - "CP7 CORS Security Implementation"
-    - "CP7 Rate Limiting Implementation"
-    - "CP7 Health Endpoints"
-    - "CP7 Production Configuration"
+    - "Rule-Based Predictor API"
+    - "Rule-Based Predictor Core Logic"
+  stuck_tasks: []
   test_all: false
-  test_priority: "stuck_first"
+  test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
