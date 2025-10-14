@@ -264,7 +264,7 @@ def main():
         print(f"   Need at least 100 stocks for meaningful validation")
     
     print(f"\n📁 Cache location: {VALIDATION_DATA_DIR}")
-    print(f"⏱️  End Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"⏱️  End Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("="*70 + "\n")
     
     return total_available
