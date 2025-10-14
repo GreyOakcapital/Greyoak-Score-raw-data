@@ -9,7 +9,8 @@ import time
 import pandas as pd
 import numpy as np
 from pathlib import Path
-from datetime import datetime, timedelta
+import datetime
+from datetime import timedelta
 import json
 import requests
 from nsepython import *
