@@ -105,6 +105,30 @@
 user_problem_statement: "Run comprehensive 5-year historical validation test on GreyOak Score Engine to validate production readiness with real market data simulation"
 
 backend:
+  - task: "Rule-Based Predictor API"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/api/routes_rule_based.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented rule-based predictor API combining GreyOak Score with technical triggers. Endpoints: GET /api/rule-based/{ticker} (single signal), POST /api/rule-based/batch (batch signals), GET /api/rule-based/ (overview), GET /api/rule-based/health (health check). Uses nsepython for real NSE data, calculates RSI-14, DMA20, 20-day high, and applies 4 priority-based rules. Backend restarted, routes loaded successfully. Ready for testing."
+
+  - task: "Rule-Based Predictor Core Logic"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/predictor/rule_based.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented RuleBasedPredictor class with: 1) fetch_price_data() using nsepython equity_history, 2) calculate_technical_indicators() for RSI-14/DMA20/ATR/20-day high, 3) calculate_greyoak_score_for_ticker() integrating with scoring engine, 4) apply_rules() implementing priority-based logic (Strong Buy/Buy/Hold/Avoid). Sector mapping, error handling, and detailed reasoning included. Ready for API testing."
+
   - task: "PostgreSQL Persistence Layer"
     implemented: true
     working: true
