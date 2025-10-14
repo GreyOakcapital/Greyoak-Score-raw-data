@@ -19,10 +19,6 @@ import time
 # Add greyoak_score to path
 sys.path.insert(0, '/app/backend')
 
-# Import GreyOak scoring engine
-from greyoak_score.core.scoring import calculate_greyoak_score
-from greyoak_score.data.models import StockData
-
 # Matplotlib
 import matplotlib
 matplotlib.use('Agg')  # Non-interactive backend
