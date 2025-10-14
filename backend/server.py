@@ -20,6 +20,14 @@ except Exception as e:
     print(f"Warning: Predictor routes not available: {e}")
     PREDICTOR_AVAILABLE = False
 
+# Import rule-based predictor routes
+try:
+    from api.routes_rule_based import router as rule_based_router
+    RULE_BASED_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: Rule-based predictor routes not available: {e}")
+    RULE_BASED_AVAILABLE = False
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
