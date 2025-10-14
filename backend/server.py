@@ -92,6 +92,11 @@ if PREDICTOR_AVAILABLE:
     app.include_router(predictor_router, prefix="/api")
     print("✅ Predictor API routes loaded")
 
+# Include rule-based predictor router if available
+if RULE_BASED_AVAILABLE:
+    app.include_router(rule_based_router, prefix="/api")
+    print("✅ Rule-Based Predictor API routes loaded")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
