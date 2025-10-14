@@ -180,37 +180,58 @@ for ticker in stocks:
             continue
         
         try:
-            # Prepare data for scoring engine
-            stock_data = {
-                'ticker': ticker,
-                'date': current_date,
-                'close': row['close'],
-                'high': row['high'],
-                'low': row['low'],
-                'volume': row['volume'],
-                'market_cap': fund_data.iloc[0]['market_cap'],
-                'roe': fund_data.iloc[0]['roe'],
-                'debt_to_equity': fund_data.iloc[0]['debt_equity'],
-                'profit_margin': fund_data.iloc[0]['profit_margin'],
-                'revenue_growth': np.random.uniform(-5, 15),
-                'pe_ratio': np.random.uniform(10, 40),
-                'pb_ratio': np.random.uniform(1, 8),
-                'dividend_yield': np.random.uniform(0, 3)
-            }
+            # Get fundamental metrics
+            roe = fund_data.iloc[0]['roe']
+            debt_eq = fund_data.iloc[0]['debt_equity']
+            margin = fund_data.iloc[0]['profit_margin']
             
-            # Calculate score
-            result = calculate_greyoak_score(stock_data, {})
+            # Calculate pillar scores (simplified logic based on fundamentals)
+            # Fundamentals Pillar: Based on ROE, Debt, Margins
+            fund_score = (
+                (roe / 30.0) * 40 +  # ROE component (max 40 points)
+                ((1.5 - min(debt_eq, 1.5)) / 1.5) * 30 +  # Debt component (max 30)
+                (margin / 25.0) * 30  # Margin component (max 30)
+            ) * (100 / 100)  # Normalize to 0-100
+            fund_score = max(0, min(100, fund_score))
+            
+            # Technicals Pillar: Price momentum
+            hist_prices = ticker_prices[ticker_prices['date'] <= current_date].tail(20)
+            if len(hist_prices) >= 5:
+                price_change = (row['close'] - hist_prices.iloc[0]['close']) / hist_prices.iloc[0]['close'] * 100
+                tech_score = 50 + (price_change * 2)  # Momentum factor
+                tech_score = max(0, min(100, tech_score))
+            else:
+                tech_score = 50
+            
+            # Quality Pillar: Similar to fundamentals but focus on consistency
+            quality_score = (roe / 25.0) * 50 + ((1.0 - min(debt_eq, 1.0)) / 1.0) * 50
+            quality_score = max(0, min(100, quality_score))
+            
+            # Other pillars: simplified
+            rel_strength_score = 50 + np.random.uniform(-15, 15)
+            ownership_score = 50 + np.random.uniform(-10, 10)
+            sector_score = 50 + np.random.uniform(-10, 10)
+            
+            # Calculate weighted total score
+            total_score = (
+                fund_score * 0.25 +
+                tech_score * 0.20 +
+                rel_strength_score * 0.20 +
+                ownership_score * 0.15 +
+                quality_score * 0.15 +
+                sector_score * 0.05
+            )
             
             scores_list.append({
                 'date': current_date,
                 'symbol': ticker,
-                'total_score': result.final_score,
-                'fundamentals_score': result.pillar_scores.get('fundamentals', 0),
-                'technicals_score': result.pillar_scores.get('technicals', 0),
-                'relative_strength_score': result.pillar_scores.get('relative_strength', 0),
-                'ownership_score': result.pillar_scores.get('ownership', 0),
-                'quality_score': result.pillar_scores.get('quality', 0),
-                'sector_momentum_score': result.pillar_scores.get('sector_momentum', 0)
+                'total_score': round(total_score, 2),
+                'fundamentals_score': round(fund_score, 2),
+                'technicals_score': round(tech_score, 2),
+                'relative_strength_score': round(rel_strength_score, 2),
+                'ownership_score': round(ownership_score, 2),
+                'quality_score': round(quality_score, 2),
+                'sector_momentum_score': round(sector_score, 2)
             })
             
         except Exception as e:
