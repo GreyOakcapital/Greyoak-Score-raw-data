@@ -194,7 +194,7 @@ def main():
     print(" "*15 + "LARGE-SCALE DATA DOWNLOADER")
     print(" "*20 + f"{len(ALL_STOCKS)} NSE STOCKS")
     print("="*70)
-    print(f"\nStart Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"\nStart Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Period: {START_DATE} to {END_DATE}")
     print(f"Cache Directory: {VALIDATION_DATA_DIR}")
     print()
