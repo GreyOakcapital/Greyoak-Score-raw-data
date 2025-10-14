@@ -38,7 +38,7 @@ def triple_barrier(
     hit_dn = np.zeros(n, dtype=bool)
     
     for i in range(n):
-        if i + T > n:
+        if i + T >= n:
             # Not enough forward data
             labels[i] = 0
             continue
@@ -47,7 +47,7 @@ def triple_barrier(
         U_px = close[i] * (1 + U[i])
         L_px = close[i] * (1 - L[i])
         
-        # Walk forward up to T bars
+        # Walk forward up to T bars (starting from next bar)
         label_set = False
         for j in range(i + 1, min(i + T + 1, n)):
             hit_up_bar = high[j] >= U_px
