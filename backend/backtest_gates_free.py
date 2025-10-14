@@ -66,7 +66,7 @@ class GatesFreePredictor:
         low = df['Low']
         
         # Calculate minimal indicators for ATR and score estimation
-        df['rsi_14'] = self._rsi(close, period=14)
+        df['rsi_14'] = self._rsi(close, n=14)
         df['dma20'] = close.rolling(window=20).mean()
         
         # ATR for stop-loss
