@@ -79,6 +79,11 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
+# Include predictor router if available
+if PREDICTOR_AVAILABLE:
+    app.include_router(predictor_router, prefix="/api")
+    print("✅ Predictor API routes loaded")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
