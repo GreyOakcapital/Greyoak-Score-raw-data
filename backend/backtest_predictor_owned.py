@@ -158,10 +158,10 @@ def backtest_one(
                     print(f"\n{'='*60}")
                     print(f"ENTRY: {ticker} @ ₹{entry_px:.2f} on {entry_date.date()}")
                     print(f"Regime: {regime}")
-                    print(f"SL: ₹{sl:.2f if sl else 'None'}, "
-                          f"TP: ₹{tp:.2f if tp else 'None'}, "
-                          f"Trail: ₹{trail:.2f if trail else 'None'}, "
-                          f"Max Hold: {max_hold} bars")
+                    sl_str = f"₹{sl:.2f}" if sl else "None"
+                    tp_str = f"₹{tp:.2f}" if tp else "None"
+                    trail_str = f"₹{trail:.2f}" if trail else "None"
+                    print(f"SL: {sl_str}, TP: {tp_str}, Trail: {trail_str}, Max Hold: {max_hold} bars")
                     print(f"Reason: {decision.reason}")
                     print(f"Meta: {decision.meta}")
             
