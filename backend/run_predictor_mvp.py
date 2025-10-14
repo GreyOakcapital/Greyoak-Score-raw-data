@@ -214,7 +214,8 @@ def main():
     print("="*70)
     print(f"End time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"\n📁 Output directory: {output_dir}")
-    print(f"   - Model: {output_dir / f'{model_artifacts[\"model_id\"]}.pkl'}")
+    model_path = output_dir / f"{model_artifacts['model_id']}.pkl"
+    print(f"   - Model: {model_path}")
     print(f"   - Predictions: {predictions_file}")
     print(f"   - CSV: {predictions_csv}")
     print()
