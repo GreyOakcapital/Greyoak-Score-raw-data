@@ -1,0 +1,16 @@
+======================================================================
+TEST #2: DEFENSIVE QUALITY - MARCH 2020 CRASH
+======================================================================
+
+Test Date: 2025-10-14 18:04:11
+Crash Period: 2020-02-24 to 2020-03-24
+Stocks Tested: 79
+
+RESULTS:
+----------------------------------------------------------------------
+High Score: -36.8% average drawdown
+Medium Score: -41.8% average drawdown
+Low Score: -38.1% average drawdown
+
+Protection Value: -1.3 percentage points
+Result: FAIL
