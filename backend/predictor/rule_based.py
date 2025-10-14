@@ -3,10 +3,14 @@ GreyOak Rule-Based Predictor
 Combines GreyOak Score Engine with technical triggers for actionable signals
 
 Rules (Priority Order):
-1. Score ≥ 70 AND price > 20-day high → Strong Buy
-2. Score ≥ 60 AND RSI ≤ 35 AND price > DMA20 → Buy  
-3. Score ≥ 60 AND RSI ≥ 65 → Hold
+1. Score ≥ 70 AND price > 20-day high → Strong Buy (Breakout)
+2. Score ≥ 60 AND RSI ≤ 38 AND price > DMA20 → Buy (Mean-Reversion)
+3. Score ≥ 60 AND RSI ≥ 65 → Hold (Overbought)
 4. Score < 50 → Avoid
+
+Predictor-Owned Exit Logic:
+- Breakout regime: 3*ATR trailing stop, 20-bar horizon
+- Mean-reversion regime: 1.5*ATR stop-loss, exit at DMA20 or RSI≥55, 10-bar horizon
 """
 
 import pandas as pd
@@ -17,6 +21,8 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, '/app/backend')
+
+from predictor.decision import Decision, Action
 
 from nsepython import equity_history
 from greyoak_score.core.scoring import calculate_greyoak_score
