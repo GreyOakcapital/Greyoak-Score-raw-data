@@ -16,11 +16,12 @@ def test_same_bar_double_touch_is_neutral():
     """Test that same-bar double touch results in neutral label"""
     print("Test: Same-bar double touch → neutral")
     
-    close = np.array([100.0])
-    high = np.array([110.0])   # Hits up barrier
-    low = np.array([90.0])     # Hits down barrier
-    U = np.array([0.08])       # 8% up
-    L = np.array([0.08])       # 8% down
+    # Need at least 2 bars (entry bar + forward bar)
+    close = np.array([100.0, 100.0])
+    high = np.array([100.0, 110.0])   # Next bar hits up barrier
+    low = np.array([100.0, 90.0])     # Next bar hits down barrier
+    U = np.array([0.08, 0.08])        # 8% up
+    L = np.array([0.08, 0.08])        # 8% down
     T = 1
     
     labels, hit_up, hit_dn = triple_barrier(close, high, low, U, L, T)
