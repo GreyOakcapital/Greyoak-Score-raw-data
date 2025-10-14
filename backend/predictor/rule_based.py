@@ -168,6 +168,152 @@ class RuleBasedPredictor:
         
         return atr
     
+    def decide(self, hist: pd.DataFrame, in_position: bool = False) -> Decision:
+        """
+        Black-box decision method for backtesting
+        
+        Given history up to date t (no future data), returns predictor-owned
+        entry/exit decision with all policy parameters.
+        
+        Args:
+            hist: DataFrame with columns [Date, Open, High, Low, Close]
+                  Sorted ascending by Date. Only data up to current time t.
+            in_position: Whether currently holding a position
+        
+        Returns:
+            Decision object with action and predictor-owned exit policy
+        """
+        if len(hist) < 20:
+            return Decision(
+                action="do_nothing",
+                reason="Insufficient history (need 20+ bars)",
+                meta={}
+            )
+        
+        # Ensure column names are standardized
+        df = hist.copy()
+        if 'date' in df.columns:
+            df = df.rename(columns={'date': 'Date'})
+        if 'open' in df.columns:
+            df = df.rename(columns={'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close'})
+        
+        # Calculate indicators (only using hist≤t)
+        close = df['Close']
+        high = df['High']
+        low = df['Low']
+        
+        df['rsi_14'] = self._calculate_rsi(close, period=14)
+        df['dma20'] = close.rolling(window=20).mean()
+        df['hi_20'] = high.rolling(window=20).max()
+        
+        # ATR for stop-loss calculation
+        tr1 = high - low
+        tr2 = abs(high - close.shift())
+        tr3 = abs(low - close.shift())
+        tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
+        df['atr_14'] = tr.rolling(window=14).mean()
+        
+        # Current bar (t)
+        row = df.iloc[-1]
+        current_close = float(row['Close'])
+        rsi = float(row['rsi_14']) if not pd.isna(row['rsi_14']) else 50.0
+        dma20 = float(row['dma20']) if not pd.isna(row['dma20']) else None
+        hi_20 = float(row['hi_20']) if not pd.isna(row['hi_20']) else None
+        atr = float(row['atr_14']) if not pd.isna(row['atr_14']) else current_close * 0.01
+        
+        # Calculate a simple quality score (0-100) for conviction
+        score = 50.0  # neutral baseline
+        
+        # Price vs DMA20 component
+        if dma20:
+            price_diff_pct = (current_close - dma20) / dma20
+            score += 30 * np.tanh(price_diff_pct / 0.03)  # ±30 points max
+        
+        # Price vs 20-day high component
+        if hi_20:
+            breakout_diff_pct = (current_close - hi_20) / hi_20
+            score += 30 * np.tanh(breakout_diff_pct / 0.01)  # ±30 points max
+        
+        # RSI component (inverted - low RSI is good for mean-reversion)
+        score += (100 - rsi) * 0.2  # up to ±20 points
+        
+        score = max(0, min(100, score))
+        
+        # Define thresholds
+        RSI_OVERSOLD = 38
+        RSI_OVERBOUGHT = 65
+        SCORE_STRONG_BUY = 65
+        SCORE_AVOID = 50
+        BREAKOUT_PAD = 0.002  # 0.2% buffer below 20-day high
+        
+        meta = {
+            "rsi": round(rsi, 1),
+            "dma20": round(dma20, 2) if dma20 else None,
+            "hi_20": round(hi_20, 2) if hi_20 else None,
+            "score": round(score, 1),
+            "atr": round(atr, 2),
+            "close": round(current_close, 2)
+        }
+        
+        # If already in position, check for exit conditions
+        if in_position:
+            # This is handled by backtester using predictor-owned policy
+            # Predictor can optionally suggest early exit here
+            return Decision(
+                action="hold_long",
+                reason="Holding position (exits managed by predictor policy)",
+                meta=meta
+            )
+        
+        # ENTRY LOGIC (when flat)
+        
+        # Rule 1: Breakout regime (Strong Buy)
+        # Score ≥ 65 AND price ≥ 20-day high (with small pad)
+        breakout_condition = (
+            hi_20 is not None and 
+            current_close >= hi_20 * (1 - BREAKOUT_PAD) and
+            score >= SCORE_STRONG_BUY
+        )
+        
+        if breakout_condition:
+            return Decision(
+                action="enter_long",
+                stop_loss=current_close - 2.0 * atr,
+                take_profit=None,  # let trail handle it
+                trail_stop=current_close - 3.0 * atr,
+                max_hold_bars=20,
+                reason="Breakout entry: Strong quality + price breakout",
+                regime="breakout",
+                meta=meta
+            )
+        
+        # Rule 2: Mean-reversion regime (Buy)
+        # RSI ≤ 38 (oversold) AND price > DMA20 (above support)
+        mean_reversion_condition = (
+            rsi <= RSI_OVERSOLD and
+            dma20 is not None and
+            current_close > dma20
+        )
+        
+        if mean_reversion_condition:
+            return Decision(
+                action="enter_long",
+                stop_loss=current_close - 1.5 * atr,
+                take_profit=None,  # exit managed by reversion logic
+                trail_stop=None,
+                max_hold_bars=10,
+                reason="Mean-reversion entry: Oversold with support",
+                regime="mean_reversion",
+                meta=meta
+            )
+        
+        # No entry signal
+        return Decision(
+            action="do_nothing",
+            reason=f"No edge (score={score:.1f}, RSI={rsi:.1f})",
+            meta=meta
+        )
+    
     def get_sector_group(self, ticker: str) -> str:
         """
         Get sector group for a ticker
