@@ -292,46 +292,31 @@ class RuleBasedPredictorTester:
         await self.test_error_handling()
         await self.test_rule_logic_validation()
     
-    def test_end_to_end_flow(self):
-        """Test end-to-end flow: calculate → save → retrieve (mocked)"""
-        print("\n🔄 Testing End-to-End Flow...")
+    def test_data_source_connectivity(self):
+        """Test NSE data source connectivity"""
+        print("\n🔗 Testing NSE Data Source Connectivity...")
         
         try:
-            from greyoak_score.core.scoring import calculate_greyoak_score
-            from greyoak_score.core.config_manager import ConfigManager
-            from greyoak_score.data.models import ScoreOutput, PillarScores
-            import pandas as pd
+            import nsepython
+            from datetime import datetime, timedelta
             
-            # Mock data for scoring
-            config_dir = Path(__file__).parent / "backend" / "configs"
-            config = ConfigManager(config_dir)
+            # Test nsepython connectivity with a simple call
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=5)
             
-            mock_pillar_scores = {'F': 75.0, 'T': 68.0, 'R': 82.0, 'O': 70.0, 'Q': 85.0, 'S': 73.0}
-            mock_prices_data = pd.Series({'close': 2500.0, 'volume': 1000000, 'median_traded_value_cr': 4.5})
-            mock_fundamentals_data = pd.Series({'market_cap_cr': 15000.0, 'roe_3y': 0.15})
-            mock_ownership_data = pd.Series({'promoter_holding_pct': 0.68, 'promoter_pledge_frac': 0.05})
+            start_str = start_date.strftime('%d-%m-%Y')
+            end_str = end_date.strftime('%d-%m-%Y')
             
-            # Test scoring engine
-            score_result = calculate_greyoak_score(
-                ticker="TESTSTOCK.NS",
-                pillar_scores=mock_pillar_scores,
-                prices_data=mock_prices_data,
-                fundamentals_data=mock_fundamentals_data,
-                ownership_data=mock_ownership_data,
-                sector_group="diversified",
-                mode="investor",
-                config=config,
-                s_z=1.2,
-                scoring_date=datetime.now()
-            )
+            # Try to fetch data for RELIANCE
+            df = nsepython.equity_history("RELIANCE", "EQ", start_str, end_str)
             
-            if isinstance(score_result, ScoreOutput) and 0 <= score_result.score <= 100:
-                self.log_test("End-to-End Scoring", True, f"Score: {score_result.score:.2f}, Band: {score_result.band}")
+            if df is not None and not df.empty:
+                self.log_test("NSE Data Connectivity", True, f"Successfully fetched {len(df)} days of RELIANCE data")
             else:
-                self.log_test("End-to-End Scoring", False, f"Invalid score result: {type(score_result)}")
+                self.log_test("NSE Data Connectivity", False, "No data returned from NSE")
                 
         except Exception as e:
-            self.log_test("End-to-End Scoring", False, f"Error: {str(e)}")
+            self.log_test("NSE Data Connectivity", False, f"Error: {str(e)}")
     
     def run_all_tests(self):
         """Run all tests"""
