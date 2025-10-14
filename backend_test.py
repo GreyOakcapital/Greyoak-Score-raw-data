@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Comprehensive Backend Test for GreyOak Score CP6 Implementation
-Tests PostgreSQL Persistence Layer and FastAPI API Layer
+Comprehensive Backend Test for GreyOak Score Engine
+Tests Rule-Based Predictor API and Core Components
 """
 
 import sys
