@@ -44,28 +44,50 @@ class Trade:
 def load_csv(path: str) -> pd.DataFrame:
     """
     Load OHLCV CSV with proper column naming
-    Expected columns: Date, Open, High, Low, Close, Volume (optional)
+    Handles NSEPython format and generic OHLCV formats
     """
     df = pd.read_csv(path)
     
-    # Standardize column names
-    col_map = {}
-    for col in df.columns:
-        col_lower = col.lower()
-        if 'date' in col_lower or 'timestamp' in col_lower:
-            col_map[col] = 'Date'
-        elif 'open' in col_lower:
-            col_map[col] = 'Open'
-        elif 'high' in col_lower:
-            col_map[col] = 'High'
-        elif 'low' in col_lower:
-            col_map[col] = 'Low'
-        elif 'close' in col_lower:
-            col_map[col] = 'Close'
+    # Handle NSEPython format (CH_ prefix columns)
+    if 'CH_TIMESTAMP' in df.columns:
+        df = df.rename(columns={
+            'CH_TIMESTAMP': 'Date',
+            'CH_OPENING_PRICE': 'Open',
+            'CH_TRADE_HIGH_PRICE': 'High',
+            'CH_TRADE_LOW_PRICE': 'Low',
+            'CH_CLOSING_PRICE': 'Close',
+            'CH_TOT_TRADED_QTY': 'Volume'
+        })
+    else:
+        # Standardize column names for generic format
+        col_map = {}
+        date_found = False
+        for col in df.columns:
+            col_lower = col.lower()
+            if not date_found and ('date' in col_lower or 'timestamp' in col_lower):
+                col_map[col] = 'Date'
+                date_found = True
+            elif 'open' in col_lower:
+                col_map[col] = 'Open'
+            elif 'high' in col_lower:
+                col_map[col] = 'High'
+            elif 'low' in col_lower:
+                col_map[col] = 'Low'
+            elif 'close' in col_lower:
+                col_map[col] = 'Close'
+        
+        df = df.rename(columns=col_map)
     
-    df = df.rename(columns=col_map)
+    # Convert date
     df['Date'] = pd.to_datetime(df['Date'])
+    
+    # Keep only required columns
+    required_cols = ['Date', 'Open', 'High', 'Low', 'Close']
+    df = df[required_cols]
+    
+    # Sort and clean
     df = df.sort_values('Date').reset_index(drop=True)
+    df = df.dropna(subset=['Open', 'High', 'Low', 'Close'])
     
     return df
 
