@@ -1,0 +1,55 @@
+# GreyOak Predictor Engine - MVP Configuration
+# Phase 1: TRADER mode (20-day horizon)
+
+predictor_score:
+  w_prob: 0.60  # Weight for p_pos in score calculation
+  thresholds:
+    DEFAULT:
+      d20:
+        E_min: 0.015          # Minimum expected edge (1.5%)
+        RA_min: 0.45          # Minimum risk-adjusted edge
+        p_pos_min_sb: 0.90    # Strong Buy threshold
+        p_pos_min_buy: 0.75   # Buy threshold
+        p_neg_min_avoid: 0.45 # Avoid threshold
+
+coverage_caps:
+  strong_buy_max: 0.12  # Max 12% of universe in SB
+  buy_max: 0.35         # Max 35% of universe in Buy
+
+barriers:
+  k_static: 1.8   # U = L = k_static * ATR14/price
+  time_h: 20      # Horizon in trading days
+
+model:
+  lgbm_params:
+    objective: multiclass
+    num_class: 3
+    metric: multi_logloss
+    boosting_type: gbdt
+    learning_rate: 0.05
+    num_leaves: 31
+    max_depth: 6
+    min_data_in_leaf: 20
+    feature_fraction: 0.8
+    bagging_fraction: 0.8
+    bagging_freq: 5
+    verbose: -1
+  class_weights:
+    pos: 1.0    # +1 label
+    neu: 0.6    # 0 label
+    neg: 1.0    # -1 label
+  cv:
+    n_splits: 5
+    embargo: 20  # Bars to skip after each fold
+
+standardize:
+  xsctn_min_n: 6      # Min stocks for cross-sectional z-score
+  tsz_alpha: 0.06     # EWMA alpha for time-series fallback
+
+storage:
+  sink: parquet       # "parquet" or "postgres"
+  output_dir: /app/backend/predictor_output
+
+api:
+  enabled: true
+  cache_seconds: 300
