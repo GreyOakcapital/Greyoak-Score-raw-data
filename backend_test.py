@@ -383,15 +383,15 @@ class RuleBasedPredictorTester:
 
 def main():
     """Main test runner"""
-    tester = CP6BackendTester()
+    tester = RuleBasedPredictorTester()
     success = tester.run_all_tests()
     
     if success:
-        print("\n✅ CP6 Backend Testing Complete - All systems operational!")
-        print("PostgreSQL Persistence & FastAPI API layers ready for production!")
+        print("\n✅ Rule-Based Predictor API Testing Complete - System operational!")
+        print("Rule-Based Predictor combining GreyOak Score + Technical Triggers ready!")
         sys.exit(0)
     else:
-        print("\n❌ CP6 Backend Testing Complete - Issues found!")
+        print("\n❌ Rule-Based Predictor API Testing Complete - Issues found!")
         sys.exit(1)
 
 if __name__ == "__main__":
