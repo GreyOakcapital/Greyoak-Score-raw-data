@@ -10,6 +10,16 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
+# Import predictor routes
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+try:
+    from api.routes_predictor import router as predictor_router
+    PREDICTOR_AVAILABLE = True
+except Exception as e:
+    print(f"Warning: Predictor routes not available: {e}")
+    PREDICTOR_AVAILABLE = False
+
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
