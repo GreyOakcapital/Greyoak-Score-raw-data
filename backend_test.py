@@ -19,12 +19,13 @@ from datetime import datetime, date
 backend_path = Path(__file__).parent / "backend"
 sys.path.insert(0, str(backend_path))
 
-class CP6BackendTester:
-    """Comprehensive tester for CP6 modules - PostgreSQL Persistence & FastAPI API"""
+class RuleBasedPredictorTester:
+    """Comprehensive tester for Rule-Based Predictor API"""
     
     def __init__(self):
         self.test_results = []
-        self.backend_url = None
+        # Use production backend URL from frontend .env
+        self.backend_url = "https://marketai-beta.preview.emergentagent.com"
         
     def log_test(self, test_name, passed, details=""):
         """Log test result"""
