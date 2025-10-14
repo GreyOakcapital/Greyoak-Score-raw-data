@@ -281,133 +281,16 @@ class RuleBasedPredictorTester:
             self.log_test("NSEPython Import", False, f"Import failed: {str(e)}")
     
     async def test_api_endpoints(self):
-        """Test all FastAPI endpoints"""
-        print("\n🌐 Testing FastAPI Endpoints...")
+        """Test all Rule-Based Predictor API endpoints"""
+        print("\n🌐 Testing Rule-Based Predictor API Endpoints...")
         
-        if not self.backend_url:
-            self.log_test("API Endpoints", False, "Backend server not started")
-            return
-        
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            # Test 1: Root endpoint
-            try:
-                response = await client.get(f"{self.backend_url}/")
-                if response.status_code == 200:
-                    data = response.json()
-                    if "GreyOak Score API" in data.get("service", ""):
-                        self.log_test("Root Endpoint", True, f"Service: {data['service']}, Version: {data['version']}")
-                    else:
-                        self.log_test("Root Endpoint", False, f"Unexpected response: {data}")
-                else:
-                    self.log_test("Root Endpoint", False, f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("Root Endpoint", False, f"Error: {str(e)}")
-            
-            # Test 2: Simple health check
-            try:
-                response = await client.get(f"{self.backend_url}/health")
-                if response.status_code == 200:
-                    data = response.json()
-                    if data.get("status") == "healthy":
-                        self.log_test("Simple Health Check", True, "Health check passed")
-                    else:
-                        self.log_test("Simple Health Check", False, f"Status: {data.get('status')}")
-                else:
-                    self.log_test("Simple Health Check", False, f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("Simple Health Check", False, f"Error: {str(e)}")
-            
-            # Test 3: Detailed health check
-            try:
-                response = await client.get(f"{self.backend_url}/api/v1/health")
-                if response.status_code in [200, 503]:  # 503 acceptable if DB down
-                    data = response.json()
-                    overall_status = data.get("status", "unknown")
-                    db_status = data.get("components", {}).get("database", {}).get("status", "unknown")
-                    self.log_test("Detailed Health Check", True, f"Overall: {overall_status}, DB: {db_status}")
-                else:
-                    self.log_test("Detailed Health Check", False, f"HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("Detailed Health Check", False, f"Error: {str(e)}")
-            
-            # Test 4: Calculate score endpoint
-            try:
-                payload = {
-                    "ticker": "RELIANCE.NS",
-                    "date": "2024-10-08",
-                    "mode": "Investor"
-                }
-                response = await client.post(f"{self.backend_url}/api/v1/calculate", json=payload)
-                if response.status_code == 200:
-                    data = response.json()
-                    score = data.get("score", 0)
-                    band = data.get("band", "")
-                    if 0 <= score <= 100 and band in ["Strong Buy", "Buy", "Hold", "Avoid"]:
-                        self.log_test("Calculate Score Endpoint", True, f"Score: {score:.2f}, Band: {band}")
-                    else:
-                        self.log_test("Calculate Score Endpoint", False, f"Invalid score/band: {score}, {band}")
-                else:
-                    self.log_test("Calculate Score Endpoint", False, f"HTTP {response.status_code}: {response.text}")
-            except Exception as e:
-                self.log_test("Calculate Score Endpoint", False, f"Error: {str(e)}")
-            
-            # Test 5: Input validation
-            try:
-                invalid_payload = {
-                    "ticker": "INVALID_TICKER_FORMAT",
-                    "date": "invalid-date",
-                    "mode": "InvalidMode"
-                }
-                response = await client.post(f"{self.backend_url}/api/v1/calculate", json=invalid_payload)
-                if response.status_code == 422:  # Validation error expected
-                    self.log_test("Input Validation", True, "Validation errors properly caught")
-                else:
-                    self.log_test("Input Validation", False, f"Expected 422, got {response.status_code}")
-            except Exception as e:
-                self.log_test("Input Validation", False, f"Error: {str(e)}")
-            
-            # Test 6: Get scores endpoint (expected to fail without database)
-            try:
-                response = await client.get(f"{self.backend_url}/api/v1/scores/RELIANCE.NS")
-                if response.status_code in [404, 500]:  # Expected without database
-                    self.log_test("Get Scores Endpoint", True, f"Endpoint working (HTTP {response.status_code} expected without DB)")
-                elif response.status_code == 200:
-                    self.log_test("Get Scores Endpoint", True, "Endpoint working with data")
-                else:
-                    self.log_test("Get Scores Endpoint", False, f"Unexpected HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("Get Scores Endpoint", False, f"Error: {str(e)}")
-            
-            # Test 7: Get by band endpoint
-            try:
-                params = {"date": "2024-10-08", "mode": "Investor"}
-                response = await client.get(f"{self.backend_url}/api/v1/scores/band/Buy", params=params)
-                if response.status_code in [404, 500]:  # Expected without database
-                    self.log_test("Get By Band Endpoint", True, f"Endpoint working (HTTP {response.status_code} expected without DB)")
-                elif response.status_code == 200:
-                    self.log_test("Get By Band Endpoint", True, "Endpoint working with data")
-                else:
-                    self.log_test("Get By Band Endpoint", False, f"Unexpected HTTP {response.status_code}")
-            except Exception as e:
-                self.log_test("Get By Band Endpoint", False, f"Error: {str(e)}")
-            
-            # Test 8: OpenAPI documentation
-            try:
-                docs_response = await client.get(f"{self.backend_url}/docs")
-                openapi_response = await client.get(f"{self.backend_url}/openapi.json")
-                
-                if docs_response.status_code == 200 and openapi_response.status_code == 200:
-                    openapi_data = openapi_response.json()
-                    title = openapi_data.get("info", {}).get("title", "")
-                    paths_count = len(openapi_data.get("paths", {}))
-                    if "GreyOak Score API" in title and paths_count >= 4:
-                        self.log_test("OpenAPI Documentation", True, f"Title: {title}, Endpoints: {paths_count}")
-                    else:
-                        self.log_test("OpenAPI Documentation", False, f"Incomplete docs: {title}, {paths_count} paths")
-                else:
-                    self.log_test("OpenAPI Documentation", False, f"Docs: {docs_response.status_code}, OpenAPI: {openapi_response.status_code}")
-            except Exception as e:
-                self.log_test("OpenAPI Documentation", False, f"Error: {str(e)}")
+        # Run all async tests
+        await self.test_rule_based_health_endpoint()
+        await self.test_rule_based_overview_endpoint()
+        await self.test_single_stock_signals()
+        await self.test_batch_signals()
+        await self.test_error_handling()
+        await self.test_rule_logic_validation()
     
     def test_end_to_end_flow(self):
         """Test end-to-end flow: calculate → save → retrieve (mocked)"""
