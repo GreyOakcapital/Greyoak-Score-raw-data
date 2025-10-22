@@ -53,10 +53,10 @@ def download_sector_indices_nsepython():
                 print(f"  📊 {display_name} ({nse_name})...", end=' ')
                 
                 # NSEPython function to get index history
-                df = nse_get_index_history(
+                df = index_history(
                     symbol=nse_name,
-                    from_date=start_date,
-                    to_date=end_date
+                    start=start_date,
+                    end=end_date
                 )
                 
                 if df is not None and not df.empty:
