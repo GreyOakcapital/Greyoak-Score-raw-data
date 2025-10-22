@@ -55,8 +55,8 @@ def download_sector_indices_nsepython():
                 # NSEPython function to get index history
                 df = index_history(
                     symbol=nse_name,
-                    start=start_date,
-                    end=end_date
+                    start_date=start_date,
+                    end_date=end_date
                 )
                 
                 if df is not None and not df.empty:
