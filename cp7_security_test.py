@@ -21,8 +21,8 @@ class CP7SecurityTester:
     """Focused CP7 security fixes validator"""
     
     def __init__(self):
-        self.base_url = "https://marketai-beta.preview.emergentagent.com"
-        self.test_origin = "https://marketai-beta.preview.emergentagent.com"
+        self.base_url = "https://greyoak-score-3.preview.emergentagent.com"
+        self.test_origin = "https://greyoak-score-3.preview.emergentagent.com"
         self.test_results = []
         self.failed_tests = []
         

@@ -39,7 +39,7 @@ The predictor applies rules in priority order. Once a rule matches, that signal 
 
 ### Base URL
 ```
-https://marketai-beta.preview.emergentagent.com/api/rule-based/
+https://greyoak-score-3.preview.emergentagent.com/api/rule-based/
 ```
 
 ### 1. Get Single Signal
@@ -52,7 +52,7 @@ https://marketai-beta.preview.emergentagent.com/api/rule-based/
 
 **Example Request:**
 ```bash
-curl -X GET "https://marketai-beta.preview.emergentagent.com/api/rule-based/RELIANCE?mode=trader"
+curl -X GET "https://greyoak-score-3.preview.emergentagent.com/api/rule-based/RELIANCE?mode=trader"
 ```
 
 **Example Response:**

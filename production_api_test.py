@@ -25,7 +25,7 @@ class ProductionAPITester:
                         break
         
         if not self.backend_url:
-            self.backend_url = "https://marketai-beta.preview.emergentagent.com"
+            self.backend_url = "https://greyoak-score-3.preview.emergentagent.com"
         
         print(f"Testing production API at: {self.backend_url}")
         self.test_results = []

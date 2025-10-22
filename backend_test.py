@@ -25,7 +25,7 @@ class RuleBasedPredictorTester:
     def __init__(self):
         self.test_results = []
         # Use production backend URL from frontend .env
-        self.backend_url = "https://marketai-beta.preview.emergentagent.com"
+        self.backend_url = "https://greyoak-score-3.preview.emergentagent.com"
         
     def log_test(self, test_name, passed, details=""):
         """Log test result"""
