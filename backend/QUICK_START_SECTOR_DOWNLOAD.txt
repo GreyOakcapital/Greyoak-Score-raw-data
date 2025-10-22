@@ -1,0 +1,50 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                    SECTOR INDICES DOWNLOAD - QUICK START                   ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📋 TASK: Download 9 sector indices (2020-2022) from investing.com
+
+🚀 QUICK STEPS:
+
+1. View Download Instructions & URLs:
+   $ cd /app/backend
+   $ python download_sector_indices_simple.py
+
+2. Check Progress:
+   $ python download_sector_indices_simple.py --status
+
+3. Combine Downloaded Files:
+   $ python download_sector_indices_simple.py --combine
+
+─────────────────────────────────────────────────────────────────────────────
+
+📥 DOWNLOAD EACH FILE:
+
+For each sector index:
+  1. Open URL in browser
+  2. Set date range: 01/01/2020 to 31/12/2022
+  3. Click Download
+  4. Save to: /app/backend/data/[filename]
+
+─────────────────────────────────────────────────────────────────────────────
+
+📊 9 SECTORS TO DOWNLOAD:
+
+ 1. Nifty Bank   → https://in.investing.com/indices/bank-nifty-historical-data
+ 2. Nifty IT     → https://in.investing.com/indices/nifty-it-historical-data
+ 3. Nifty Auto   → https://in.investing.com/indices/cnx-auto-historical-data
+ 4. Nifty Pharma → https://in.investing.com/indices/cnx-pharma-historical-data
+ 5. Nifty FMCG   → https://in.investing.com/indices/cnx-fmcg-historical-data
+ 6. Nifty Metal  → https://in.investing.com/indices/cnx-metal-historical-data
+ 7. Nifty Realty → https://in.investing.com/indices/cnx-realty-historical-data
+ 8. Nifty Energy → https://in.investing.com/indices/cnx-energy-historical-data
+ 9. Nifty Media  → https://in.investing.com/indices/cnx-media-historical-data
+
+─────────────────────────────────────────────────────────────────────────────
+
+✅ OUTPUT: /app/backend/sector_indices_2020_2022.csv
+
+📖 FULL GUIDE: SECTOR_INDICES_DOWNLOAD_GUIDE.md
+📈 STATUS: SECTOR_DATA_COLLECTION_STATUS.md
+
+─────────────────────────────────────────────────────────────────────────────
