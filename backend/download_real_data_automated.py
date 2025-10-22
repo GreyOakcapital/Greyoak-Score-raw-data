@@ -42,8 +42,8 @@ def download_sector_indices_nsepython():
         }
         
         all_data = []
-        start_date = '01-01-2020'
-        end_date = '31-12-2022'
+        start_date = '2020-01-01'
+        end_date = '2022-12-31'
         
         print(f"\n📥 Downloading sector indices from NSE...")
         print(f"   Date range: {start_date} to {end_date}\n")
