@@ -330,15 +330,13 @@ def main():
     # Method 3: Synthetic data as last resort
     print("\n⚠️ All real data sources failed. Creating synthetic data...")
     print("⚠️ This is for testing only. Real data recommended for production.")
+    print("⚠️ AUTO-CREATING synthetic data for automated workflow...")
     
-    user_input = input("\nCreate synthetic data for testing? (yes/no): ").lower()
+    df = create_synthetic_sector_data()
     
-    if user_input == 'yes':
-        df = create_synthetic_sector_data()
-        
-        if df is not None:
-            print("\n✓ Synthetic data created!")
-            return save_sector_indices(df, output_file)
+    if df is not None:
+        print("\n✓ Synthetic data created!")
+        return save_sector_indices(df, output_file)
     
     # All methods failed
     print("\n" + "="*80)
