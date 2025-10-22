@@ -455,11 +455,21 @@ def main():
     
     ca_file = "/app/backend/corporate_actions_2020_2022.csv"
     
-    # Try NSEPython
-    df_ca = download_corporate_actions_nsepython()
+    # Try Kaggle for corporate actions (NSEPython doesn't have this feature)
+    df_ca = download_corporate_actions_kaggle()
     
-    if save_data(df_ca, ca_file, "Corporate Actions"):
-        success_count += 1
+    # If Kaggle data found, process it
+    if df_ca is not None and not df_ca.empty:
+        # Try to process it to our schema
+        try:
+            df_ca_processed = process_nse_corporate_actions(df_ca)
+            if save_data(df_ca_processed, ca_file, "Corporate Actions"):
+                success_count += 1
+        except:
+            print("⚠️ Could not process corporate actions to standard schema")
+    else:
+        print("⚠️ Corporate actions data not available from automated sources")
+        print("   Consider manual collection for this data type")
     
     # ============================================================================
     # FINAL REPORT
