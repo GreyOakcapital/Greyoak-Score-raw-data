@@ -26,7 +26,7 @@ def download_sector_indices_nsepython():
     print("="*80)
     
     try:
-        from nsepython import nse_get_index_history
+        from nsepython import index_history
         
         # NSE sector index names
         sector_indices = {
