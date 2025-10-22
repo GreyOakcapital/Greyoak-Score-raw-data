@@ -63,15 +63,19 @@ def download_sector_indices_nsepython():
                     # Standardize columns
                     df['Index'] = display_name
                     
-                    # NSEPython returns: date, open, high, low, close, shares_traded, turnover
+                    # NSEPython returns: DATE, OPEN, HIGH, LOW, CLOSE, etc.
                     df = df.rename(columns={
-                        'date': 'Date',
-                        'open': 'Open',
-                        'high': 'High',
-                        'low': 'Low',
-                        'close': 'Close',
-                        'shares_traded': 'Volume'
+                        'DATE': 'Date',
+                        'OPEN': 'Open',
+                        'HIGH': 'High',
+                        'LOW': 'Low',
+                        'CLOSE': 'Close',
+                        'HistoricalDate': 'Date'
                     })
+                    
+                    # If volume column exists, use it; otherwise set to 0
+                    if 'Volume' not in df.columns:
+                        df['Volume'] = 0
                     
                     df = df[['Index', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
                     
