@@ -238,73 +238,71 @@ def download_sector_indices_kaggle():
         traceback.print_exc()
         return None
 
-def download_corporate_actions_nsepython():
+def download_corporate_actions_kaggle():
     """
-    Method 1: Download corporate actions using NSEPython
+    Download corporate actions from Kaggle
     """
     print("\n" + "="*80)
-    print("METHOD 1: NSEPython Library - Corporate Actions")
+    print("METHOD 1: Kaggle API - Corporate Actions")
     print("="*80)
     
     try:
-        from nsepython import nse_get_corporate_action
+        import kaggle
         
-        print("\n📥 Downloading corporate actions from NSE...")
-        
-        # NSE corporate actions by quarters
-        quarters = [
-            ('01-01-2020', '31-03-2020'),
-            ('01-04-2020', '30-06-2020'),
-            ('01-07-2020', '30-09-2020'),
-            ('01-10-2020', '31-12-2020'),
-            ('01-01-2021', '31-03-2021'),
-            ('01-04-2021', '30-06-2021'),
-            ('01-07-2021', '30-09-2021'),
-            ('01-10-2021', '31-12-2021'),
-            ('01-01-2022', '31-03-2022'),
-            ('01-04-2022', '30-06-2022'),
-            ('01-07-2022', '30-09-2022'),
-            ('01-10-2022', '31-12-2022'),
+        # Search for corporate actions datasets
+        datasets_to_try = [
+            'rohanrao/nifty50-stock-market-data',  # May have corporate actions
+            'debashis74017/indian-stock-market-data'  # May have corporate actions
         ]
         
-        all_actions = []
+        print("\n📥 Searching Kaggle for corporate actions data...")
         
-        for from_date, to_date in quarters:
+        for dataset_name in datasets_to_try:
             try:
-                print(f"  Downloading {from_date} to {to_date}...", end=' ')
+                print(f"\n  Trying dataset: {dataset_name}")
                 
-                df = nse_get_corporate_action(from_date=from_date, to_date=to_date)
+                download_path = f"/app/backend/data/kaggle_ca_{dataset_name.split('/')[-1]}"
+                os.makedirs(download_path, exist_ok=True)
                 
-                if df is not None and not df.empty:
-                    all_actions.append(df)
-                    print(f"✓ {len(df)} records")
-                else:
-                    print("✗ No data")
+                kaggle.api.dataset_download_files(
+                    dataset_name,
+                    path=download_path,
+                    unzip=True,
+                    quiet=True
+                )
                 
-                time.sleep(1)
+                # Look for corporate actions file
+                csv_files = [f for f in os.listdir(download_path) if f.endswith('.csv')]
+                
+                for csv_file in csv_files:
+                    filepath = os.path.join(download_path, csv_file)
+                    df_sample = pd.read_csv(filepath, nrows=10)
+                    
+                    # Check if it's corporate actions data
+                    cols_lower = ' '.join([c.lower() for c in df_sample.columns])
+                    if any(kw in cols_lower for kw in ['dividend', 'split', 'bonus', 'corporate', 'action']):
+                        print(f"    ✓ Found corporate actions in: {csv_file}")
+                        
+                        # Load full file
+                        df_full = pd.read_csv(filepath)
+                        
+                        # Process and filter for 2020-2022
+                        # Assuming columns like: Symbol, Date, Action, Details, etc.
+                        # This needs to be adjusted based on actual dataset structure
+                        
+                        print(f"    Loaded {len(df_full)} records")
+                        return df_full  # Return raw data for now
+                        
+                print("    ✗ No corporate actions data found")
                 
             except Exception as e:
-                print(f"✗ Error: {str(e)[:50]}")
+                print(f"    ✗ Error: {str(e)[:50]}")
         
-        if all_actions:
-            combined_df = pd.concat(all_actions, ignore_index=True)
-            
-            # Process to our schema
-            processed_df = process_nse_corporate_actions(combined_df)
-            
-            print(f"\n✓ NSEPython: Downloaded {len(processed_df):,} corporate actions")
-            return processed_df
-        else:
-            print("\n✗ NSEPython: No data retrieved")
-            return None
-            
-    except ImportError:
-        print("\n✗ NSEPython not installed")
+        print("\n✗ Kaggle: No corporate actions data found in searched datasets")
         return None
+        
     except Exception as e:
-        print(f"\n✗ NSEPython failed: {e}")
-        import traceback
-        traceback.print_exc()
+        print(f"\n✗ Kaggle API failed: {e}")
         return None
 
 def process_nse_corporate_actions(df):
