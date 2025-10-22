@@ -199,7 +199,7 @@ def download_sector_nse_api():
 
 def create_synthetic_sector_data():
     """
-    Method 3: Create synthetic/approximated sector data based on Nifty 50
+    Method 3: Create synthetic/approximated sector data based on realistic patterns
     This is a fallback when no real data is available
     """
     print("\n" + "="*80)
@@ -208,55 +208,83 @@ def create_synthetic_sector_data():
     print("\n⚠️ WARNING: Using synthetic data for testing purposes only")
     
     try:
-        # Download Nifty 50 as base
-        print("\n📊 Downloading Nifty 50 as base...")
-        nifty = yf.download('^NSEI', start='2020-01-01', end='2022-12-31', progress=False)
+        import numpy as np
         
-        if nifty.empty:
-            print("✗ Could not download Nifty 50 data")
-            return None
+        print("\n📊 Generating synthetic sector indices...")
         
-        print(f"✓ Got Nifty 50 data ({len(nifty)} rows)")
+        # Create date range (2020-2022, trading days only)
+        date_range = pd.date_range(start='2020-01-01', end='2022-12-31', freq='B')  # B = business days
         
-        # Create sector variations with different volatility multipliers
-        sector_multipliers = {
-            'Nifty Bank': 1.3,      # More volatile
-            'Nifty IT': 1.2,        # Tech sector
-            'Nifty Auto': 1.15,     # Cyclical
-            'Nifty Pharma': 0.9,    # Defensive
-            'Nifty FMCG': 0.85,     # Stable
-            'Nifty Metal': 1.4,     # Very volatile
-            'Nifty Realty': 1.5,    # Most volatile
-            'Nifty Energy': 1.1,    # Moderate
-            'Nifty Media': 1.25     # Media sector
+        # Base values and volatility for each sector
+        sector_configs = {
+            'Nifty Bank': {'base': 30000, 'volatility': 0.02, 'trend': 0.0001},
+            'Nifty IT': {'base': 20000, 'volatility': 0.018, 'trend': 0.00015},
+            'Nifty Auto': {'base': 8000, 'volatility': 0.019, 'trend': 0.00008},
+            'Nifty Pharma': {'base': 12000, 'volatility': 0.012, 'trend': 0.00012},
+            'Nifty FMCG': {'base': 35000, 'volatility': 0.01, 'trend': 0.00010},
+            'Nifty Metal': {'base': 3500, 'volatility': 0.025, 'trend': 0.00005},
+            'Nifty Realty': {'base': 250, 'volatility': 0.028, 'trend': 0.00003},
+            'Nifty Energy': {'base': 16000, 'volatility': 0.015, 'trend': 0.00009},
+            'Nifty Media': {'base': 1600, 'volatility': 0.022, 'trend': 0.00007}
         }
         
         all_data = []
+        np.random.seed(42)  # For reproducibility
         
-        for sector_name, multiplier in sector_multipliers.items():
-            sector_df = nifty.copy()
-            sector_df = sector_df.reset_index()
+        for sector_name, config in sector_configs.items():
+            base_price = config['base']
+            volatility = config['volatility']
+            trend = config['trend']
             
-            # Apply multiplier to create sector variation
-            for col in ['Open', 'High', 'Low', 'Close']:
-                sector_df[col] = sector_df[col] * multiplier
+            # Generate price series using geometric Brownian motion
+            n_days = len(date_range)
+            returns = np.random.normal(trend, volatility, n_days)
+            price_series = base_price * np.exp(np.cumsum(returns))
             
-            sector_df['Index'] = sector_name
-            sector_df['Volume'] = sector_df['Volume'] * (multiplier * 0.7)
+            # Create OHLC data
+            sector_data = []
+            for i, date in enumerate(date_range):
+                close = price_series[i]
+                
+                # Generate realistic OHLC
+                intraday_range = close * volatility * np.random.uniform(0.5, 1.5)
+                high = close + abs(np.random.normal(0, intraday_range/2))
+                low = close - abs(np.random.normal(0, intraday_range/2))
+                open_price = low + np.random.uniform(0, high - low)
+                
+                # Ensure OHLC consistency
+                high = max(high, open_price, close)
+                low = min(low, open_price, close)
+                
+                # Generate volume (varies by sector)
+                base_volume = base_price * 1000
+                volume = int(base_volume * np.random.uniform(0.7, 1.3))
+                
+                sector_data.append({
+                    'Index': sector_name,
+                    'Date': date,
+                    'Open': round(open_price, 2),
+                    'High': round(high, 2),
+                    'Low': round(low, 2),
+                    'Close': round(close, 2),
+                    'Volume': volume
+                })
             
-            sector_df = sector_df[['Index', 'Date', 'Open', 'High', 'Low', 'Close', 'Volume']]
+            sector_df = pd.DataFrame(sector_data)
             all_data.append(sector_df)
             
-            print(f"  ✓ Generated {sector_name}")
+            print(f"  ✓ Generated {sector_name} ({len(sector_df)} days)")
         
         combined_df = pd.concat(all_data, ignore_index=True)
-        print(f"\n✓ Synthetic Data: Created 9/9 indices ({len(combined_df)} rows)")
-        print("⚠️ NOTE: This is approximated data. Replace with real data when available.")
+        print(f"\n✓ Synthetic Data: Created 9/9 indices ({len(combined_df):,} rows)")
+        print("⚠️ NOTE: This is synthetic data for testing. Replace with real data when available.")
         
         return combined_df
         
     except Exception as e:
         print(f"\n✗ Synthetic Data: Failed - {e}")
+        import traceback
+        traceback.print_exc()
         return None
 
 def save_sector_indices(df, output_file):
