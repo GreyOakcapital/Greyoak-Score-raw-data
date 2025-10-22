@@ -80,3 +80,10 @@ dmypy.json
 *.json
 !configs/*.yaml
 !tests/fixtures/*.yaml
+
+# Exception: Include critical data files for GreyOak
+!HISTORICAL_DATA_3_YEARS_205_STOCKS.csv
+!sector_indices_2020_2022.csv
+!fundamentals_quarterly_2020_2022.csv
+!ownership_quarterly_2020_2022.csv
+!corporate_actions_2020_2022.csv
